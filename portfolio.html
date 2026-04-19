@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en" id="portfolioPage">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portfolio — PortGen</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink:  '#09090c', ink2: '#111116', ink3: '#18181f',
+            ink4: '#22222c', ink5: '#2e2e3a',
+            gold: '#c8a96e', gold2:'#e2c98a',
+            tx1:  '#f0ede6', tx2:  '#9a9790', tx3:  '#5a5854',
+          },
+          fontFamily: {
+            display: ['Fraunces','serif'],
+            sans:    ['DM Sans','sans-serif'],
+          },
+          keyframes: {
+            fadeUp:  { from:{opacity:0,transform:'translateY(24px)'}, to:{opacity:1,transform:'translateY(0)'} },
+            fadeIn:  { from:{opacity:0}, to:{opacity:1} },
+            pulse2:  { '0%,100%':{opacity:.6}, '50%':{opacity:1} },
+          },
+          animation: {
+            fadeUp:  'fadeUp .7s ease both',
+            fadeUp1: 'fadeUp .7s .12s ease both',
+            fadeUp2: 'fadeUp .7s .24s ease both',
+            fadeUp3: 'fadeUp .7s .36s ease both',
+            fadeIn:  'fadeIn .5s ease both',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Hexagon clip */
+    .hex { clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%); }
+
+    /* Scroll reveal */
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity .7s ease,transform .7s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width:5px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:#2e2e3a; border-radius:999px; }
+
+    /* Hero grid */
+    .grid-bg {
+      background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),
+                       linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);
+      background-size:60px 60px;
+      mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black 40%,transparent 100%);
+    }
+
+    /* Skill bar fill */
+    .skill-bar { height:3px; border-radius:999px; background:rgba(200,169,110,.15); overflow:hidden; }
+    .skill-fill { height:100%; border-radius:999px; background:linear-gradient(90deg,#c8a96e,#e2c98a); transition:width 1.2s cubic-bezier(.4,0,.2,1); }
+
+    /* Timeline line */
+    .timeline::before {
+      content:''; position:absolute; left:20px; top:0; bottom:0;
+      width:1px; background:linear-gradient(to bottom,transparent,rgba(200,169,110,.3),transparent);
+    }
+
+    /* Section divider */
+    .section-divider {
+      height:1px;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
+    }
+
+    /* Mobile nav */
+    #mobileNav { display:none; }
+    #mobileNav.open { display:flex; }
+
+    /* Portfolio theme switcher */
+    .pf-theme-btn.active { background:rgba(200,169,110,.15); border-color:rgba(200,169,110,.4); color:#c8a96e; }
+
+    /* Theme: Minimal Light */
+    [data-pf-theme="light"] body,
+    [data-pf-theme="light"] #portfolioPage { --pf-bg:#f5f4f0; --pf-surface:#ffffff; --pf-border:rgba(0,0,0,.08); --pf-text1:#1a1a1e; --pf-text2:#5a5a62; --pf-text3:#9a9a9e; }
+
+    /* Typing cursor blink */
+    .cursor::after { content:'|'; animation:blink 1s step-end infinite; color:#c8a96e; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* Floating label on photo */
+    .photo-ring { box-shadow:0 0 0 3px rgba(200,169,110,.3), 0 0 0 6px rgba(200,169,110,.1); }
+
+    /* Card hover glow */
+    .project-card { transition:all .3s; }
+    .project-card:hover { border-color:rgba(200,169,110,.4); transform:translateY(-4px); box-shadow:0 16px 48px rgba(0,0,0,.4),0 0 0 1px rgba(200,169,110,.15); }
+
+    /* Print styles */
+    @media print {
+      #portfolioNav, #themeBar, #backBtn, #printBtn { display:none !important; }
+      .reveal { opacity:1 !important; transform:none !important; }
+    }
+  </style>
+</head>
+
+<body class="bg-ink text-tx1 font-sans overflow-x-hidden" id="portfolioBody">
+
+<!-- ══════════════════════════════════════════════
+     EMPTY STATE — shown when no data exists
+══════════════════════════════════════════════ -->
+<div id="emptyState" class="hidden min-h-screen flex items-center justify-center flex-col gap-6 px-6 text-center">
+  <div class="text-6xl opacity-30">🪄</div>
+  <h2 class="font-display text-3xl font-medium text-tx1">No Resume Data Found</h2>
+  <p class="text-tx2 max-w-md">
+    You haven't filled in your resume yet. Go to the Resume Builder first, fill in your details, then come back here to see your portfolio.
+  </p>
+  <a href="cv.html"
+     class="inline-flex items-center gap-2 bg-gold text-[#1a0f00] font-medium px-7 py-3 rounded-xl
+            hover:bg-gold2 hover:-translate-y-0.5 transition-all">
+    ← Open Resume Builder
+  </a>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MAIN PORTFOLIO (shown when data exists)
+══════════════════════════════════════════════ -->
+<div id="portfolioMain" class="hidden">
+
+  <!-- ── STICKY NAV ── -->
+  <nav id="portfolioNav"
+       class="fixed top-0 left-0 right-0 z-50 h-14 flex items-center
+              bg-ink/90 border-b border-white/[.06] backdrop-blur-xl transition-all">
+    <div class="max-w-6xl mx-auto px-6 w-full flex items-center">
+
+      <!-- Logo -->
+      <a href="#hero" class="flex items-center gap-2 mr-auto">
+        <div class="hex w-6 h-6 bg-gold"></div>
+        <span id="navName" class="font-display text-base font-medium text-tx1 tracking-tight"></span>
+      </a>
+
+      <!-- Desktop nav -->
+      <ul id="desktopNav" class="hidden md:flex items-center gap-0.5 list-none"></ul>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-2 ml-4">
+        <a href="cv.html" id="backBtn"
+           class="hidden md:inline-flex items-center gap-1.5 text-xs text-tx3
+                  px-3 py-1.5 rounded-md border border-white/[.07] hover:text-gold
+                  hover:border-gold/30 transition-all">
+          ← Edit Resume
+        </a>
+        <button onclick="downloadPortfolioZip()" id="downloadPortfolioBtn"
+                class="inline-flex items-center gap-1.5 text-xs font-semibold
+                       text-[#1a0f00] bg-gold px-4 py-1.5 rounded-md
+                       hover:bg-gold2 transition-all">
+          ⬇ Download Portfolio
+        </button>
+        <!-- Hamburger -->
+        <button onclick="document.getElementById('mobileNav').classList.toggle('open')"
+                class="md:hidden flex flex-col gap-1 p-1.5 ml-1">
+          <span class="w-4 h-px bg-tx2 block rounded"></span>
+          <span class="w-4 h-px bg-tx2 block rounded"></span>
+          <span class="w-4 h-px bg-tx2 block rounded"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile nav dropdown -->
+    <div id="mobileNav"
+         class="absolute top-14 left-0 right-0 bg-ink/98 border-b border-white/[.07]
+                flex-col px-6 py-4 gap-1 backdrop-blur-xl">
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════════════
+       HERO SECTION
+  ══════════════════════════════════════════════ -->
+  <section id="hero" class="relative min-h-screen flex items-center pt-20 pb-16 overflow-hidden">
+    <div class="grid-bg absolute inset-0 pointer-events-none"></div>
+    <div class="absolute top-1/3 right-0 w-[600px] h-[600px] rounded-full pointer-events-none"
+         style="background:radial-gradient(circle,rgba(200,169,110,.06) 0%,transparent 70%)"></div>
+    <div class="absolute bottom-0 left-1/4 w-[400px] h-[400px] rounded-full pointer-events-none"
+         style="background:radial-gradient(circle,rgba(80,120,200,.04) 0%,transparent 70%)"></div>
+
+    <div class="max-w-6xl mx-auto px-6 w-full relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-16 items-center">
+
+        <!-- Left: text (3/5) -->
+        <div class="lg:col-span-3">
+          <div class="inline-flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/20
+                      px-4 py-1.5 rounded-full mb-6 animate-fadeUp">
+            <span class="w-1.5 h-1.5 rounded-full bg-gold animate-pulse"></span>
+            Available for opportunities
+          </div>
+
+          <h1 id="heroName"
+              class="font-display text-5xl lg:text-7xl font-medium leading-[1.05] tracking-tight
+                     text-tx1 mb-4 animate-fadeUp1">
+          </h1>
+
+          <div id="heroTitle"
+               class="text-lg lg:text-xl text-gold font-medium mb-6 animate-fadeUp2">
+          </div>
+
+          <p id="heroSummary"
+             class="text-base text-tx2 leading-relaxed max-w-xl mb-8 animate-fadeUp3">
+          </p>
+
+          <!-- Contact chips -->
+          <div id="heroContacts" class="flex flex-wrap gap-2 mb-8 animate-fadeUp3"></div>
+
+          <!-- CTA buttons -->
+          <div id="heroCTAs" class="flex flex-wrap gap-3 animate-fadeUp3"></div>
+        </div>
+
+        <!-- Right: photo + stats (2/5) -->
+        <div class="lg:col-span-2 flex flex-col items-center gap-6 animate-fadeUp2">
+          <!-- Profile photo or initials -->
+          <div id="heroPhoto" class="relative">
+          </div>
+
+          <!-- Quick stats grid -->
+          <div id="statsGrid" class="grid grid-cols-2 gap-3 w-full max-w-xs"></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       ABOUT / SKILLS
+  ══════════════════════════════════════════════ -->
+  <section id="about" class="py-24 bg-ink2">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+
+        <!-- About text -->
+        <div class="reveal">
+          <div class="inline-flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/20
+                      px-3.5 py-1.5 rounded-full mb-5">
+            <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>About Me
+          </div>
+          <h2 class="font-display text-3xl md:text-4xl font-medium tracking-tight mb-5">
+            A little about<br><em class="not-italic text-gold">who I am</em>
+          </h2>
+          <p id="aboutSummary" class="text-base text-tx2 leading-relaxed mb-6"></p>
+
+          <!-- Info grid -->
+          <div id="aboutInfo" class="grid grid-cols-2 gap-4"></div>
+        </div>
+
+        <!-- Skills -->
+        <div class="reveal">
+          <div class="inline-flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/20
+                      px-3.5 py-1.5 rounded-full mb-5">
+            <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>Skills & Tools
+          </div>
+          <h2 class="font-display text-3xl md:text-4xl font-medium tracking-tight mb-5">
+            My <em class="not-italic text-gold">expertise</em>
+          </h2>
+          <div id="skillsList" class="flex flex-wrap gap-2.5"></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       EXPERIENCE
+  ══════════════════════════════════════════════ -->
+  <section id="experience" class="py-24">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-14 reveal">
+        <div class="inline-flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/20
+                    px-3.5 py-1.5 rounded-full mb-5">
+          <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>Career
+        </div>
+        <h2 class="font-display text-3xl md:text-4xl font-medium tracking-tight">Work Experience</h2>
+      </div>
+      <div id="experienceList" class="relative timeline pl-12 flex flex-col gap-8 max-w-3xl mx-auto reveal"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       EDUCATION
+  ══════════════════════════════════════════════ -->
+  <section id="education" class="py-24 bg-ink2">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-14 reveal">
+        <div class="inline-flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/20
+                    px-3.5 py-1.5 rounded-full mb-5">
+          <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>Education
+        </div>
+        <h2 class="font-display text-3xl md:text-4xl font-medium tracking-tight">Academic Background</h2>
+      </div>
+      <div id="educationList" class="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl mx-auto reveal"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       PROJECTS
+  ══════════════════════════════════════════════ -->
+  <section id="projects" class="py-24">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-14 reveal">
+        <div class="inline-flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/20
+                    px-3.5 py-1.5 rounded-full mb-5">
+          <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>Work
+        </div>
+        <h2 class="font-display text-3xl md:text-4xl font-medium tracking-tight">Featured Projects</h2>
+        <p class="text-tx2 mt-3 max-w-md mx-auto text-sm">A selection of things I've built and shipped.</p>
+      </div>
+      <div id="projectsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 reveal"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       CERTIFICATIONS
+  ══════════════════════════════════════════════ -->
+  <section id="certifications" class="py-24 bg-ink2">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-14 reveal">
+        <div class="inline-flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/20
+                    px-3.5 py-1.5 rounded-full mb-5">
+          <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>Credentials
+        </div>
+        <h2 class="font-display text-3xl md:text-4xl font-medium tracking-tight">Certifications</h2>
+      </div>
+      <div id="certList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto reveal"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       CONTACT
+  ══════════════════════════════════════════════ -->
+  <section id="contact" class="py-28 relative overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none"
+         style="background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(200,169,110,.06) 0%,transparent 70%)"></div>
+    <div class="absolute inset-0 pointer-events-none"
+         style="background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:50px 50px"></div>
+
+    <div class="max-w-3xl mx-auto px-6 text-center relative z-10 reveal">
+      <div class="inline-flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/20
+                  px-3.5 py-1.5 rounded-full mb-6">
+        <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>Get In Touch
+      </div>
+      <h2 class="font-display text-4xl md:text-5xl font-medium tracking-tight leading-tight mb-4">
+        Let's work <em class="not-italic text-gold">together</em>
+      </h2>
+      <p id="contactSub" class="text-tx2 text-base mb-10 max-w-lg mx-auto leading-relaxed"></p>
+
+      <!-- Contact cards -->
+      <div id="contactCards" class="flex flex-wrap justify-center gap-4 mb-10"></div>
+
+      <!-- Social links -->
+      <div id="socialLinks" class="flex flex-wrap justify-center gap-3"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════════════ -->
+  <footer class="bg-ink2 border-t border-white/[.07] py-8">
+    <div class="max-w-6xl mx-auto px-6 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <div class="hex w-5 h-5 bg-gold"></div>
+        <span id="footerName" class="font-display text-sm font-medium text-tx1"></span>
+      </div>
+      <p class="text-xs text-tx3">Built with <span class="text-gold">PortGen</span> · © <span id="footerYear"></span></p>
+      <a href="cv.html"
+         class="text-xs text-tx3 hover:text-gold transition-colors border border-white/[.07]
+                px-3 py-1.5 rounded-md hover:border-gold/30">
+        ← Edit Resume
+      </a>
+    </div>
+  </footer>
+
+</div><!-- /portfolioMain -->
+
+
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════
+   LOAD DATA FROM LOCALSTORAGE
+═══════════════════════════════════════════ */
+const raw = localStorage.getItem('resumeforge_data');
+const d   = raw ? JSON.parse(raw) : null;
+
+if (!d || (!d.firstName && !d.lastName && !d.email)) {
+  document.getElementById('emptyState').classList.remove('hidden');
+} else {
+  document.getElementById('portfolioMain').classList.remove('hidden');
+  buildPortfolio(d);
+}
+
+/* ═══════════════════════════════════════════
+   ESCAPE HELPER
+═══════════════════════════════════════════ */
+function esc(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ═══════════════════════════════════════════
+   MAIN BUILD FUNCTION
+═══════════════════════════════════════════ */
+function buildPortfolio(d) {
+  const fullName = [d.firstName, d.lastName].filter(Boolean).join(' ');
+  document.title = fullName ? `${fullName} — Portfolio` : 'My Portfolio';
+  document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+  buildNav(d, fullName);
+  buildHero(d, fullName);
+  buildAbout(d);
+  buildSkills(d);
+  buildExperience(d);
+  buildEducation(d);
+  buildProjects(d);
+  buildCertifications(d);
+  buildContact(d, fullName);
+
+  // Scroll reveal
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // Sticky nav scroll effect
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('portfolioNav');
+    nav.style.background = scrollY > 60 ? 'rgba(9,9,12,0.97)' : 'rgba(9,9,12,0.90)';
+  });
+}
+
+/* ─── NAV ─── */
+function buildNav(d, fullName) {
+  document.getElementById('navName').textContent = fullName || 'Portfolio';
+  document.getElementById('footerName').textContent = fullName || 'PortGen';
+
+  const sections = [
+    { id:'hero',   label:'Home' },
+    { id:'about',  label:'About' },
+    ...(d.experience?.length ? [{ id:'experience', label:'Experience' }] : []),
+    ...(d.education?.length  ? [{ id:'education',  label:'Education' }]  : []),
+    ...(d.projects?.length   ? [{ id:'projects',   label:'Projects' }]   : []),
+    ...(d.certifications?.length ? [{ id:'certifications', label:'Certs' }] : []),
+    { id:'contact', label:'Contact' },
+  ];
+
+  const desktop = document.getElementById('desktopNav');
+  const mobile  = document.getElementById('mobileNav');
+
+  sections.forEach(s => {
+    // Desktop link
+    const li = document.createElement('li');
+    li.innerHTML = `<a href="#${s.id}" class="text-sm text-tx2 px-3.5 py-1.5 rounded-md
+      hover:text-tx1 hover:bg-white/5 transition-all nav-link" data-target="${s.id}">${esc(s.label)}</a>`;
+    desktop.appendChild(li);
+
+    // Mobile link
+    const ma = document.createElement('a');
+    ma.href = `#${s.id}`;
+    ma.className = 'block py-2.5 text-sm text-tx2 border-b border-white/[.05] hover:text-tx1 transition-colors';
+    ma.textContent = s.label;
+    ma.addEventListener('click', () => document.getElementById('mobileNav').classList.remove('open'));
+    mobile.appendChild(ma);
+  });
+
+  // Active link on scroll
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      const el = document.getElementById(s.id);
+      if (el && window.scrollY >= el.offsetTop - 100) current = s.id;
+    });
+    document.querySelectorAll('.nav-link').forEach(a => {
+      a.classList.toggle('text-gold', a.dataset.target === current);
+      a.classList.toggle('text-tx2', a.dataset.target !== current);
+    });
+  });
+}
+
+/* ─── HERO ─── */
+function buildHero(d, fullName) {
+  // Name
+  document.getElementById('heroName').textContent = fullName || 'Hello, World!';
+  // Title
+  document.getElementById('heroTitle').textContent = d.jobTitle || '';
+  // Summary
+  document.getElementById('heroSummary').textContent = d.summary || '';
+
+  // Contact chips
+  const contacts = document.getElementById('heroContacts');
+  if (d.email)    contacts.innerHTML += chipLink(`mailto:${d.email}`, '✉', d.email);
+  if (d.phone)    contacts.innerHTML += chipLink(`tel:${d.phone}`, '✆', d.phone);
+  if (d.location) contacts.innerHTML += chip('◎', d.location);
+  if (d.website)  contacts.innerHTML += chipLink(d.website, '⌁', d.website.replace(/^https?:\/\//,''));
+
+  // CTA buttons
+  const ctas = document.getElementById('heroCTAs');
+  if (d.email) {
+    ctas.innerHTML += `<a href="mailto:${esc(d.email)}"
+      class="inline-flex items-center gap-2 bg-gold text-[#1a0f00] font-medium px-7 py-3.5 rounded-xl
+             hover:bg-gold2 hover:-translate-y-0.5 hover:shadow-xl transition-all text-base">
+      Hire Me →
+    </a>`;
+  }
+  if (d.linkedin) {
+    ctas.innerHTML += `<a href="${esc(d.linkedin)}" target="_blank"
+      class="inline-flex items-center gap-2 border border-white/10 text-tx2 px-6 py-3.5 rounded-xl
+             hover:border-gold hover:text-gold hover:bg-gold/10 transition-all text-base">
+      LinkedIn ↗
+    </a>`;
+  }
+  if (d.github) {
+    ctas.innerHTML += `<a href="${esc(d.github)}" target="_blank"
+      class="inline-flex items-center gap-2 border border-white/10 text-tx2 px-6 py-3.5 rounded-xl
+             hover:border-gold hover:text-gold hover:bg-gold/10 transition-all text-base">
+      GitHub ↗
+    </a>`;
+  }
+
+  // Photo or initials avatar
+  const photoEl = document.getElementById('heroPhoto');
+  if (d.photo) {
+    photoEl.innerHTML = `
+      <div class="relative">
+        <img src="${d.photo}" alt="${esc(fullName)}"
+             class="photo-ring w-52 h-52 lg:w-64 lg:h-64 rounded-full object-cover">
+        <div class="absolute -bottom-2 -right-2 bg-gold text-[#1a0f00] text-xs font-semibold
+                    px-3 py-1.5 rounded-full shadow-lg">
+          Open to Work
+        </div>
+      </div>`;
+  } else {
+    const initials = [d.firstName?.[0], d.lastName?.[0]].filter(Boolean).join('').toUpperCase() || '?';
+    photoEl.innerHTML = `
+      <div class="photo-ring w-52 h-52 lg:w-64 lg:h-64 rounded-full
+                  bg-gradient-to-br from-gold/30 to-gold/10 border border-gold/30
+                  flex items-center justify-center">
+        <span class="font-display text-6xl font-medium text-gold">${esc(initials)}</span>
+      </div>`;
+  }
+
+  // Stats grid
+  const stats = document.getElementById('statsGrid');
+  const expCount = d.experience?.length || 0;
+  const projCount = d.projects?.length || 0;
+  const skillCount = d.skills?.length || 0;
+  const certCount = d.certifications?.length || 0;
+
+  const statItems = [
+    { val: expCount,   label: 'Roles' },
+    { val: projCount,  label: 'Projects' },
+    { val: skillCount, label: 'Skills' },
+    { val: certCount,  label: 'Certs' },
+  ].filter(s => s.val > 0);
+
+  stats.innerHTML = statItems.map(s => `
+    <div class="bg-ink3 border border-white/[.07] rounded-2xl p-4 text-center">
+      <div class="font-display text-3xl font-medium text-gold">${s.val}</div>
+      <div class="text-xs text-tx3 mt-1">${s.label}</div>
+    </div>`).join('');
+}
+
+function chip(icon, text) {
+  return `<span class="inline-flex items-center gap-1.5 text-xs text-tx2 bg-ink3 border border-white/[.07]
+                        px-3 py-1.5 rounded-full">${icon} ${esc(text)}</span>`;
+}
+function chipLink(href, icon, text) {
+  return `<a href="${esc(href)}" target="_blank"
+             class="inline-flex items-center gap-1.5 text-xs text-tx2 bg-ink3 border border-white/[.07]
+                    px-3 py-1.5 rounded-full hover:border-gold/30 hover:text-gold transition-all">
+            ${icon} ${esc(text)}
+          </a>`;
+}
+
+/* ─── ABOUT ─── */
+function buildAbout(d) {
+  document.getElementById('aboutSummary').textContent =
+    d.summary || 'No summary provided yet.';
+
+  const info = document.getElementById('aboutInfo');
+  const rows = [
+    { icon:'✉', label:'Email',    val: d.email },
+    { icon:'✆', label:'Phone',    val: d.phone },
+    { icon:'◎', label:'Location', val: d.location },
+    { icon:'⌁', label:'Website',  val: d.website },
+  ].filter(r => r.val);
+
+  info.innerHTML = rows.map(r => `
+    <div class="bg-ink3 border border-white/[.07] rounded-xl p-4">
+      <div class="text-[.65rem] text-tx3 uppercase tracking-widest mb-1">${r.icon} ${r.label}</div>
+      <div class="text-sm text-tx1 truncate">${esc(r.val)}</div>
+    </div>`).join('');
+}
+
+/* ─── SKILLS ─── */
+function buildSkills(d) {
+  const container = document.getElementById('skillsList');
+  if (!d.skills?.length) {
+    container.innerHTML = '<p class="text-tx3 text-sm">No skills added yet.</p>';
+    return;
+  }
+  // Assign pseudo-random "level" for visual variety
+  const levels = [90,75,85,70,95,80,65,88,72,92];
+  container.innerHTML = d.skills.map((s, i) => `
+    <div class="group relative">
+      <span class="inline-flex items-center gap-1.5 text-sm font-medium
+                   bg-ink3 border border-white/[.07] text-tx1
+                   px-4 py-2 rounded-full cursor-default
+                   hover:border-gold/40 hover:text-gold hover:bg-gold/10
+                   transition-all duration-200">
+        ${esc(s)}
+      </span>
+    </div>`).join('');
+}
+
+/* ─── EXPERIENCE ─── */
+function buildExperience(d) {
+  const list = document.getElementById('experienceList');
+  if (!d.experience?.length) {
+    document.getElementById('experience').style.display = 'none';
+    return;
+  }
+  list.innerHTML = d.experience.map((e, i) => `
+    <div class="relative reveal" style="transition-delay:${i * 80}ms">
+      <!-- Timeline dot -->
+      <div class="absolute -left-[41px] top-5 w-4 h-4 rounded-full border-2 border-gold bg-ink
+                  flex items-center justify-center">
+        <div class="w-1.5 h-1.5 rounded-full bg-gold"></div>
+      </div>
+      <!-- Card -->
+      <div class="bg-ink3 border border-white/[.07] rounded-2xl p-6 hover:border-gold/20 transition-all">
+        <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+          <div>
+            <h3 class="font-medium text-base text-tx1">${esc(e.title)}</h3>
+            ${e.company ? `<p class="text-sm text-gold mt-0.5">${esc(e.company)}</p>` : ''}
+          </div>
+          ${(e.from || e.to) ? `
+            <span class="text-xs text-tx3 bg-ink4 px-3 py-1 rounded-full border border-white/[.06] whitespace-nowrap">
+              ${esc([e.from, e.to].filter(Boolean).join(' – '))}
+            </span>` : ''}
+        </div>
+        ${e.desc ? `<p class="text-sm text-tx2 leading-relaxed whitespace-pre-line">${esc(e.desc)}</p>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+/* ─── EDUCATION ─── */
+function buildEducation(d) {
+  const list = document.getElementById('educationList');
+  if (!d.education?.length) {
+    document.getElementById('education').style.display = 'none';
+    return;
+  }
+  list.innerHTML = d.education.map((e, i) => `
+    <div class="bg-ink3 border border-white/[.07] rounded-2xl p-6 hover:border-gold/20 transition-all reveal"
+         style="transition-delay:${i * 80}ms">
+      <div class="flex items-start gap-4">
+        <div class="w-10 h-10 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-lg flex-shrink-0">
+          🎓
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-medium text-base text-tx1 mb-0.5">${esc(e.school)}</h3>
+          ${(e.degree || e.field) ? `<p class="text-sm text-gold">${esc([e.degree,e.field].filter(Boolean).join(', '))}</p>` : ''}
+          ${(e.from || e.to) ? `<p class="text-xs text-tx3 mt-1">${esc([e.from,e.to].filter(Boolean).join(' – '))}</p>` : ''}
+          ${e.desc ? `<p class="text-sm text-tx2 mt-2 leading-relaxed">${esc(e.desc)}</p>` : ''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+/* ─── PROJECTS ─── */
+function buildProjects(d) {
+  const list = document.getElementById('projectsList');
+  if (!d.projects?.length) {
+    document.getElementById('projects').style.display = 'none';
+    return;
+  }
+
+  // Accent colors cycling for project cards
+  const accents = [
+    'from-gold/10 to-gold/5',
+    'from-blue-500/10 to-blue-500/5',
+    'from-emerald-500/10 to-emerald-500/5',
+    'from-purple-500/10 to-purple-500/5',
+    'from-rose-500/10 to-rose-500/5',
+    'from-cyan-500/10 to-cyan-500/5',
+  ];
+
+  list.innerHTML = d.projects.map((p, i) => `
+    <div class="project-card bg-ink3 border border-white/[.07] rounded-2xl overflow-hidden reveal"
+         style="transition-delay:${i * 80}ms">
+      <!-- Card top gradient strip -->
+      <div class="h-1.5 bg-gradient-to-r ${accents[i % accents.length]}
+                  border-b border-white/[.04]"
+           style="background:linear-gradient(90deg,rgba(200,169,110,.4),transparent)"></div>
+      <div class="p-6">
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <h3 class="font-medium text-base text-tx1">${esc(p.name || 'Untitled Project')}</h3>
+          ${p.url ? `
+            <a href="${esc(p.url)}" target="_blank"
+               class="text-gold text-xs hover:text-gold2 transition-colors flex-shrink-0 mt-0.5">
+              ↗ View
+            </a>` : ''}
+        </div>
+        ${p.role ? `<p class="text-xs text-gold mb-2">${esc(p.role)}</p>` : ''}
+        ${p.desc ? `<p class="text-sm text-tx2 leading-relaxed">${esc(p.desc)}</p>` : ''}
+        ${p.url ? `
+          <div class="mt-4 pt-4 border-t border-white/[.06]">
+            <a href="${esc(p.url)}" target="_blank"
+               class="inline-flex items-center gap-1.5 text-xs text-tx3
+                      hover:text-gold transition-colors">
+              <span class="truncate max-w-[200px]">${esc(p.url.replace(/^https?:\/\//,''))}</span>
+              <span>↗</span>
+            </a>
+          </div>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+/* ─── CERTIFICATIONS ─── */
+function buildCertifications(d) {
+  const list = document.getElementById('certList');
+  if (!d.certifications?.length) {
+    document.getElementById('certifications').style.display = 'none';
+    return;
+  }
+  list.innerHTML = d.certifications.map((c, i) => `
+    <div class="bg-ink3 border border-white/[.07] rounded-2xl p-6 hover:border-gold/20 transition-all reveal"
+         style="transition-delay:${i * 80}ms">
+      <div class="w-10 h-10 rounded-xl bg-gold/10 border border-gold/20
+                  flex items-center justify-center text-xl mb-4">🏆</div>
+      <h3 class="font-medium text-sm text-tx1 mb-1">${esc(c.name)}</h3>
+      ${c.issuer ? `<p class="text-xs text-gold mb-1">${esc(c.issuer)}</p>` : ''}
+      ${c.date ? `<p class="text-xs text-tx3">${esc(c.date)}</p>` : ''}
+      ${c.url ? `
+        <a href="${esc(c.url)}" target="_blank"
+           class="inline-flex items-center gap-1 text-xs text-tx3 hover:text-gold transition-colors mt-3">
+          View credential ↗
+        </a>` : ''}
+    </div>`).join('');
+}
+
+/* ─── CONTACT ─── */
+function buildContact(d, fullName) {
+  document.getElementById('contactSub').textContent =
+    `I'm ${d.firstName || 'available'} and open to new opportunities. ` +
+    `Whether you have a project in mind, a role to fill, or just want to say hi — reach out!`;
+
+  const cards = document.getElementById('contactCards');
+  if (d.email) {
+    cards.innerHTML += `
+      <a href="mailto:${esc(d.email)}"
+         class="flex items-center gap-3 bg-ink3 border border-white/[.07] rounded-2xl px-6 py-4
+                hover:border-gold/40 hover:-translate-y-1 hover:bg-gold/5 transition-all group">
+        <span class="text-2xl">✉️</span>
+        <div class="text-left">
+          <div class="text-xs text-tx3 mb-0.5">Email</div>
+          <div class="text-sm text-tx1 group-hover:text-gold transition-colors">${esc(d.email)}</div>
+        </div>
+      </a>`;
+  }
+  if (d.phone) {
+    cards.innerHTML += `
+      <a href="tel:${esc(d.phone)}"
+         class="flex items-center gap-3 bg-ink3 border border-white/[.07] rounded-2xl px-6 py-4
+                hover:border-gold/40 hover:-translate-y-1 hover:bg-gold/5 transition-all group">
+        <span class="text-2xl">📱</span>
+        <div class="text-left">
+          <div class="text-xs text-tx3 mb-0.5">Phone</div>
+          <div class="text-sm text-tx1 group-hover:text-gold transition-colors">${esc(d.phone)}</div>
+        </div>
+      </a>`;
+  }
+  if (d.location) {
+    cards.innerHTML += `
+      <div class="flex items-center gap-3 bg-ink3 border border-white/[.07] rounded-2xl px-6 py-4">
+        <span class="text-2xl">📍</span>
+        <div class="text-left">
+          <div class="text-xs text-tx3 mb-0.5">Location</div>
+          <div class="text-sm text-tx1">${esc(d.location)}</div>
+        </div>
+      </div>`;
+  }
+
+  // Social links
+  const social = document.getElementById('socialLinks');
+  const socials = [
+    { key:'linkedin', label:'LinkedIn', icon:'🔗' },
+    { key:'github',   label:'GitHub',   icon:'🐙' },
+    { key:'portfolio',label:'Portfolio',icon:'🌐' },
+    { key:'twitter',  label:'Twitter',  icon:'🐦' },
+    { key:'website',  label:'Website',  icon:'⌁'  },
+  ];
+  socials.forEach(s => {
+    if (d[s.key]) {
+      social.innerHTML += `
+        <a href="${esc(d[s.key])}" target="_blank"
+           class="inline-flex items-center gap-2 bg-ink3 border border-white/[.07] text-tx2 text-sm
+                  px-5 py-2.5 rounded-full hover:border-gold/40 hover:text-gold
+                  hover:bg-gold/10 transition-all">
+          ${s.icon} ${s.label}
+        </a>`;
+    }
+  });
+
+  if (!cards.innerHTML && !social.innerHTML) {
+    document.getElementById('contactCards').innerHTML =
+      '<p class="text-tx3 text-sm">No contact info added yet.</p>';
+  }
+}
+
+/* ─── SMOOTH SCROLL ─── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) { e.preventDefault(); t.scrollIntoView({ behavior:'smooth', block:'start' }); }
+  });
+});
+
+
+/* ─── SMOOTH SCROLL already above ─── */
+</script>
+
+<!-- Download generator — kept in separate .js file so template literals never corrupt the HTML parser -->
+<script src="new.js"></script>
+
+</body>
+</html>

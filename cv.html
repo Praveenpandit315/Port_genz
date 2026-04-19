@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ResumeForge — Professional Resume Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     TOP NAVIGATION BAR
+════════════════════════════════════════════════════ -->
+<header class="topbar">
+  <div class="topbar-left">
+    <a href="home.html" class="logo" title="Back to Home" style="text-decoration:none;">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">PortGen</span>
+    </a>
+  </div>
+  <div class="topbar-center">
+    <!-- Progress Bar -->
+    <div class="progress-container">
+      <span class="progress-label">Profile Completeness</span>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <span class="progress-pct" id="progressPct">0%</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <!-- Template Selector -->
+    <div class="template-selector">
+      <button class="btn-ghost template-btn active" data-tpl="classic" onclick="setTemplate('classic')">Classic</button>
+      <button class="btn-ghost template-btn" data-tpl="modern" onclick="setTemplate('modern')">Modern</button>
+      <button class="btn-ghost template-btn" data-tpl="minimal" onclick="setTemplate('minimal')">Minimal</button>
+    </div>
+    <div class="topbar-actions">
+      <a href="home.html" class="btn-ghost" title="Back to Home Page">← Home</a>
+      <button class="btn-icon" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">☀</button>
+      <button class="btn-ghost" onclick="saveResume()" title="Save to browser">💾 Save</button>
+      <button class="btn-ghost" onclick="openA4Preview()" title="A4 Page Preview">👁 Preview</button>
+      <a href="portfolio.html" class="btn-ghost" style="color:var(--gold);border-color:rgba(200,169,110,0.35);" title="View your portfolio site">🌐 Portfolio</a>
+      <button class="btn-primary" id="downloadBtn" onclick="downloadPDF()">⬇ Download PDF</button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN LAYOUT — SIDEBAR + PREVIEW
+════════════════════════════════════════════════════ -->
+<main class="app-layout">
+
+  <!-- ── LEFT SIDEBAR: FORM ── -->
+  <aside class="sidebar" id="sidebar">
+
+    <!-- Section Navigator -->
+    <nav class="section-nav" id="sectionNav">
+      <button class="nav-item active" data-section="personal" onclick="showSection('personal')">
+        <span class="nav-icon">👤</span> Personal
+      </button>
+      <button class="nav-item" data-section="summary" onclick="showSection('summary')">
+        <span class="nav-icon">📝</span> Summary
+      </button>
+      <button class="nav-item" data-section="experience" onclick="showSection('experience')">
+        <span class="nav-icon">💼</span> Experience
+      </button>
+      <button class="nav-item" data-section="education" onclick="showSection('education')">
+        <span class="nav-icon">🎓</span> Education
+      </button>
+      <button class="nav-item" data-section="skills" onclick="showSection('skills')">
+        <span class="nav-icon">⚡</span> Skills
+      </button>
+      <button class="nav-item" data-section="projects" onclick="showSection('projects')">
+        <span class="nav-icon">🚀</span> Projects
+      </button>
+      <button class="nav-item" data-section="certifications" onclick="showSection('certifications')">
+        <span class="nav-icon">🏆</span> Certifications
+      </button>
+      <button class="nav-item" data-section="social" onclick="showSection('social')">
+        <span class="nav-icon">🔗</span> Social Links
+      </button>
+    </nav>
+
+    <!-- ── PERSONAL INFO ── -->
+    <section class="form-panel active" id="panel-personal">
+      <h2 class="panel-title">Personal Information</h2>
+
+      <div class="photo-upload-area" onclick="document.getElementById('photoInput').click()">
+        <div class="photo-preview" id="photoPreview">
+          <span class="photo-placeholder">+<br>Photo</span>
+        </div>
+        <div class="photo-hint">Click to upload profile photo</div>
+        <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(event)">
+      </div>
+
+      <div class="form-grid-2">
+        <div class="field">
+          <label>First Name</label>
+          <input type="text" id="firstName" placeholder="Jane" oninput="updateResume()" />
+        </div>
+        <div class="field">
+          <label>Last Name</label>
+          <input type="text" id="lastName" placeholder="Smith" oninput="updateResume()" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Professional Title</label>
+        <input type="text" id="jobTitle" placeholder="Senior Product Designer" oninput="updateResume()" />
+      </div>
+      <div class="form-grid-2">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="jane@example.com" oninput="updateResume()" />
+        </div>
+        <div class="field">
+          <label>Phone</label>
+          <input type="tel" id="phone" placeholder="+1 555 000 0000" oninput="updateResume()" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Location</label>
+        <input type="text" id="location" placeholder="San Francisco, CA" oninput="updateResume()" />
+      </div>
+      <div class="field">
+        <label>Website</label>
+        <input type="url" id="website" placeholder="https://yoursite.com" oninput="updateResume()" />
+      </div>
+    </section>
+
+    <!-- ── SUMMARY ── -->
+    <section class="form-panel" id="panel-summary">
+      <h2 class="panel-title">Career Summary</h2>
+      <div class="field">
+        <label>Professional Summary / Objective</label>
+        <textarea id="summary" rows="7" placeholder="Write a compelling summary that highlights your key achievements, skills, and career objectives..." oninput="updateResume()"></textarea>
+        <span class="char-count" id="summaryCount">0 / 400</span>
+      </div>
+    </section>
+
+    <!-- ── EXPERIENCE ── -->
+    <section class="form-panel" id="panel-experience">
+      <h2 class="panel-title">Work Experience</h2>
+      <div id="experienceList" class="dynamic-list"></div>
+      <button class="btn-add" onclick="addExperience()">+ Add Experience</button>
+    </section>
+
+    <!-- ── EDUCATION ── -->
+    <section class="form-panel" id="panel-education">
+      <h2 class="panel-title">Education</h2>
+      <div id="educationList" class="dynamic-list"></div>
+      <button class="btn-add" onclick="addEducation()">+ Add Education</button>
+    </section>
+
+    <!-- ── SKILLS ── -->
+    <section class="form-panel" id="panel-skills">
+      <h2 class="panel-title">Skills</h2>
+      <div class="field">
+        <label>Add a skill and press Enter</label>
+        <div class="skill-input-row">
+          <input type="text" id="skillInput" placeholder="e.g. React, Python, Figma…" onkeydown="handleSkillKey(event)" />
+          <button class="btn-ghost" onclick="addSkill()">Add</button>
+        </div>
+      </div>
+      <div class="skill-tags" id="skillTags"></div>
+    </section>
+
+    <!-- ── PROJECTS ── -->
+    <section class="form-panel" id="panel-projects">
+      <h2 class="panel-title">Projects</h2>
+      <div id="projectList" class="dynamic-list"></div>
+      <button class="btn-add" onclick="addProject()">+ Add Project</button>
+    </section>
+
+    <!-- ── CERTIFICATIONS ── -->
+    <section class="form-panel" id="panel-certifications">
+      <h2 class="panel-title">Certifications</h2>
+      <div id="certList" class="dynamic-list"></div>
+      <button class="btn-add" onclick="addCert()">+ Add Certification</button>
+    </section>
+
+    <!-- ── SOCIAL LINKS ── -->
+    <section class="form-panel" id="panel-social">
+      <h2 class="panel-title">Social Links</h2>
+      <div class="field">
+        <label>LinkedIn</label>
+        <input type="url" id="linkedin" placeholder="https://linkedin.com/in/username" oninput="updateResume()" />
+      </div>
+      <div class="field">
+        <label>GitHub</label>
+        <input type="url" id="github" placeholder="https://github.com/username" oninput="updateResume()" />
+      </div>
+      <div class="field">
+        <label>Portfolio</label>
+        <input type="url" id="portfolio" placeholder="https://yourportfolio.com" oninput="updateResume()" />
+      </div>
+      <div class="field">
+        <label>Twitter / X</label>
+        <input type="url" id="twitter" placeholder="https://twitter.com/username" oninput="updateResume()" />
+      </div>
+    </section>
+
+  </aside>
+
+  <!-- ── RIGHT: LIVE PREVIEW ── -->
+  <div class="preview-area">
+    <div class="preview-toolbar">
+      <span class="preview-label">Live Preview</span>
+      <div class="zoom-controls">
+        <button class="btn-icon" onclick="changeZoom(-0.1)">−</button>
+        <span id="zoomLevel">100%</span>
+        <button class="btn-icon" onclick="changeZoom(0.1)">+</button>
+      </div>
+    </div>
+    <div class="preview-scroll">
+      <div class="preview-wrapper" id="previewWrapper">
+        <div class="resume-sheet" id="resumePreview">
+          <!-- Rendered by JS -->
+          <div class="empty-state">
+            <div class="empty-icon">📄</div>
+            <p>Start filling in your details<br>to see your resume come to life</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════
+     TOAST NOTIFICATION
+════════════════════════════════════════════════════ -->
+<div class="toast" id="toast"></div>
+
+<!-- A4 Preview Modal -->
+<div id="a4Modal" style="display:none; position:fixed; inset:0; z-index:9999;
+  background:rgba(0,0,0,0.85); backdrop-filter:blur(8px);
+  align-items:center; justify-content:center; flex-direction:column; gap:16px;">
+
+  <!-- Toolbar inside modal -->
+  <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;">
+    <span style="font-family:'DM Sans',sans-serif; font-size:0.78rem; color:#9a9790;
+                 background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+                 padding:5px 14px; border-radius:6px; letter-spacing:0.04em;">
+      A4 Preview — 210 × 297 mm
+    </span>
+    <button onclick="closeA4Preview()"
+            style="font-family:'DM Sans',sans-serif; font-size:0.82rem; color:#9a9790;
+                   background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+                   padding:6px 16px; border-radius:6px; cursor:pointer;">
+      ✕ Close
+    </button>
+    <button onclick="downloadPDF()"
+            style="font-family:'DM Sans',sans-serif; font-size:0.82rem; font-weight:600;
+                   color:#1a0f00; background:#c8a96e; border:none;
+                   padding:7px 18px; border-radius:6px; cursor:pointer;">
+      ⬇ Download PDF
+    </button>
+  </div>
+
+  <!-- A4 page container - exact A4 ratio 1:1.4142 -->
+  <div style="overflow:auto; max-height:calc(100vh - 100px); padding:0 20px;">
+    <div id="a4PageContainer"
+         style="width:794px; height:1123px; background:white;
+                box-shadow:0 24px 80px rgba(0,0,0,0.7);
+                border-radius:2px; overflow:hidden; position:relative;">
+      <div id="a4ResumeContent" style="width:100%; height:100%;"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- PDF generation libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="app.js"></script>
+</body>
+</html>

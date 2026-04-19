@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PortGen — Build Your Portfolio & Resume in Minutes</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink:  '#09090c', ink2: '#111116', ink3: '#18181f',
+            ink4: '#22222c', ink5: '#2e2e3a',
+            gold: '#c8a96e', gold2:'#e2c98a',
+            tx1:  '#f0ede6', tx2:  '#9a9790', tx3:  '#5a5854',
+          },
+          fontFamily: {
+            display: ['Fraunces','serif'],
+            sans:    ['DM Sans','sans-serif'],
+          },
+          keyframes: {
+            fadeUp:   { from:{opacity:0,transform:'translateY(20px)'}, to:{opacity:1,transform:'translateY(0)'} },
+            floatBob: { '0%,100%':{transform:'translateY(0)'}, '50%':{transform:'translateY(-8px)'} },
+          },
+          animation: {
+            fadeUp:  'fadeUp .6s ease both',
+            fadeUp1: 'fadeUp .6s .1s ease both',
+            fadeUp2: 'fadeUp .6s .2s ease both',
+            fadeUp3: 'fadeUp .6s .3s ease both',
+            float:   'floatBob 4s ease-in-out infinite',
+            float2:  'floatBob 4s 2s ease-in-out infinite',
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- Minimal custom CSS — only what Tailwind can't handle inline -->
+  <style>
+    /* Hexagon clip-path for logo */
+    .hex { clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%); }
+
+    /* Scroll-reveal animation */
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity .65s ease,transform .65s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+
+    /* Hero grid background */
+    .grid-bg {
+      background-image: linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),
+                        linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+      background-size:60px 60px;
+      mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%);
+    }
+
+    /* Feature card top-border accent on hover */
+    .feat-card { position:relative; overflow:hidden; }
+    .feat-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg,transparent,#c8a96e,transparent);
+      opacity:0; transition:opacity .3s;
+    }
+    .feat-card:hover::before { opacity:1; }
+
+    /* Steps horizontal connector line */
+    @media(min-width:1024px) {
+      .steps-row::before {
+        content:''; position:absolute;
+        top:38px; left:calc(12.5% + 20px); right:calc(12.5% + 20px); height:1px;
+        background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),rgba(200,169,110,.2),rgba(255,255,255,.1),transparent);
+      }
+    }
+
+    /* Template hover reveal */
+    .tpl-use  { opacity:0; transition:opacity .25s; }
+    .tpl-card:hover .tpl-use { opacity:1; }
+    .tpl-card { transition:all .3s; }
+    .tpl-card:hover {
+      border-color:#c8a96e !important;
+      transform:translateY(-6px);
+      box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(200,169,110,.2);
+    }
+
+    /* Mobile menu toggle */
+    #mobileMenu { display:none; }
+    #mobileMenu.open { display:block; }
+  </style>
+</head>
+
+<body class="bg-ink text-tx1 font-sans overflow-x-hidden leading-relaxed">
+
+<!-- ══════════════════════════════
+     NAVBAR
+══════════════════════════════ -->
+<nav id="navbar"
+     class="fixed top-0 left-0 right-0 z-50 h-16 flex items-center
+            bg-ink/85 backdrop-blur-lg border-b border-white/[.07] transition-all duration-300">
+  <div class="w-full max-w-6xl mx-auto px-6 flex items-center">
+
+    <!-- Logo -->
+    <a href="#" class="flex items-center gap-2.5 mr-auto">
+      <div class="hex w-7 h-7 bg-gold"></div>
+      <span class="font-display text-xl font-medium text-tx1 tracking-tight">PortGen</span>
+    </a>
+
+    <!-- Desktop links -->
+    <ul class="hidden md:flex items-center gap-0.5 list-none">
+      <li><a href="#"             class="text-sm text-tx2 px-3.5 py-1.5 rounded-md hover:text-tx1 hover:bg-white/5 transition-all">Home</a></li>
+      <li><a href="#features"     class="text-sm text-tx2 px-3.5 py-1.5 rounded-md hover:text-tx1 hover:bg-white/5 transition-all">Features</a></li>
+      <li><a href="#templates"    class="text-sm text-tx2 px-3.5 py-1.5 rounded-md hover:text-tx1 hover:bg-white/5 transition-all">Templates</a></li>
+      <li><a href="#how-it-works" class="text-sm text-tx2 px-3.5 py-1.5 rounded-md hover:text-tx1 hover:bg-white/5 transition-all">How It Works</a></li>
+      <li><a href="portfolio.html" class="text-sm text-tx2 px-3.5 py-1.5 rounded-md hover:text-tx1 hover:bg-white/5 transition-all">Portfolio</a></li>
+    </ul>
+
+    <!-- CTA buttons -->
+    <div class="hidden md:flex items-center gap-2 ml-5">
+      <a href="#"         class="text-sm text-tx2 px-4 py-1.5 rounded-md border border-white/10 hover:text-tx1 hover:bg-white/5 transition-all">Login</a>
+      <a href="cv.html" class="text-sm font-medium bg-gold text-[#1a0f00] px-5 py-2 rounded-md
+                                  hover:bg-gold2 hover:-translate-y-0.5 hover:shadow-lg transition-all">Get Started →</a>
+    </div>
+
+    <!-- Hamburger -->
+    <button onclick="toggleMenu()" class="md:hidden flex flex-col gap-1.5 p-1.5 ml-3">
+      <span class="w-5 h-px bg-tx2 rounded block"></span>
+      <span class="w-5 h-px bg-tx2 rounded block"></span>
+      <span class="w-5 h-px bg-tx2 rounded block"></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div id="mobileMenu"
+     class="fixed top-16 left-0 right-0 z-40 bg-ink/98 backdrop-blur-lg border-b border-white/10 px-6 pb-6">
+  <a href="#"             class="block py-3 text-tx2 border-b border-white/5 hover:text-tx1 transition-colors">Home</a>
+  <a href="#features"     class="block py-3 text-tx2 border-b border-white/5 hover:text-tx1 transition-colors">Features</a>
+  <a href="#templates"    class="block py-3 text-tx2 border-b border-white/5 hover:text-tx1 transition-colors">Templates</a>
+  <a href="#how-it-works" class="block py-3 text-tx2 border-b border-white/5 hover:text-tx1 transition-colors">How It Works</a>
+  <a href="portfolio.html" class="block py-3 text-tx2 border-b border-white/5 hover:text-tx1 transition-colors">Portfolio</a>
+  <a href="cv.html"    class="block mt-4 text-center bg-gold text-[#1a0f00] font-medium py-3 rounded-md">Get Started →</a>
+</div>
+
+
+<!-- ══════════════════════════════
+     HERO
+══════════════════════════════ -->
+<section id="home" class="relative min-h-screen flex items-center pt-28 pb-20 overflow-hidden">
+
+  <div class="grid-bg absolute inset-0 pointer-events-none"></div>
+  <div class="absolute top-1/4 right-5 w-[500px] h-[500px] rounded-full pointer-events-none"
+       style="background:radial-gradient(circle,rgba(200,169,110,.08) 0%,transparent 70%)"></div>
+
+  <div class="max-w-6xl mx-auto px-6 w-full relative z-10">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+      <!-- Left: copy -->
+      <div>
+        <div class="inline-flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/25
+                    px-4 py-1.5 rounded-full mb-6 animate-fadeUp">
+          <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>
+          Now with AI-powered suggestions
+        </div>
+
+        <h1 class="font-display text-5xl lg:text-6xl font-medium leading-[1.08] tracking-tight
+                   text-tx1 mb-5 animate-fadeUp1">
+          Create Your<br>
+          <em class="not-italic text-gold">Portfolio &amp; Resume</em><br>
+          in Minutes
+        </h1>
+
+        <p class="text-lg text-tx2 leading-relaxed mb-9 max-w-lg animate-fadeUp2">
+          Build a professional portfolio website and generate a polished resume PDF instantly
+          — no coding, no templates to fight with.
+        </p>
+
+        <div class="flex gap-3 flex-wrap animate-fadeUp3">
+          <a href="cv.html"
+             class="inline-flex items-center gap-2 bg-gold text-[#1a0f00] font-medium text-base
+                    px-7 py-3.5 rounded-xl hover:bg-gold2 hover:-translate-y-0.5
+                    hover:shadow-xl transition-all">
+            Create Portfolio <span>→</span>
+          </a>
+          <a href="#templates"
+             class="inline-flex items-center gap-2 border border-white/10 text-tx2 text-base
+                    px-6 py-3.5 rounded-xl hover:border-gold hover:text-gold
+                    hover:bg-gold/10 transition-all">
+            View Templates
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: mockup (desktop only) -->
+      <div class="hidden lg:block relative">
+        <div class="relative h-[440px]">
+
+          <!-- Back card -->
+          <div class="absolute left-0 top-10 w-[280px] h-[360px] bg-ink3 border border-white/10
+                      rounded-3xl overflow-hidden shadow-2xl opacity-60"
+               style="transform:rotate(-4deg)">
+            <div class="h-9 bg-ink4 border-b border-white/5 flex items-center gap-1.5 px-3.5">
+              <div class="w-2 h-2 rounded-full bg-[#ff5f57]"></div>
+              <div class="w-2 h-2 rounded-full bg-[#febc2e]"></div>
+              <div class="w-2 h-2 rounded-full bg-[#28c840]"></div>
+            </div>
+            <div class="p-4 flex flex-col gap-2">
+              <div class="h-2 w-[70%] rounded bg-ink5 opacity-50"></div>
+              <div class="h-2 w-[40%] rounded bg-ink5 opacity-30"></div>
+              <div class="h-2 w-[80%] rounded bg-ink5 opacity-20 mt-3"></div>
+              <div class="h-2 w-[60%] rounded bg-ink5 opacity-20"></div>
+            </div>
+          </div>
+
+          <!-- Main card -->
+          <div class="absolute left-[60px] top-0 z-10 w-[340px] h-[420px] bg-ink3 border border-white/10
+                      rounded-3xl overflow-hidden shadow-2xl">
+            <div class="h-9 bg-ink4 border-b border-white/5 flex items-center gap-1.5 px-3.5">
+              <div class="w-2 h-2 rounded-full bg-[#ff5f57]"></div>
+              <div class="w-2 h-2 rounded-full bg-[#febc2e]"></div>
+              <div class="w-2 h-2 rounded-full bg-[#28c840]"></div>
+              <span class="ml-2 text-[.65rem] text-tx3">resume-preview</span>
+            </div>
+            <div class="p-4">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-11 h-11 rounded-full flex-shrink-0"
+                     style="background:linear-gradient(135deg,#c8a96e,#e8904a)"></div>
+                <div class="flex-1 flex flex-col gap-1.5">
+                  <div class="h-2 w-[80%] rounded bg-ink5"></div>
+                  <div class="h-2 w-[55%] rounded" style="background:rgba(200,169,110,.25)"></div>
+                </div>
+              </div>
+              <div class="h-1.5 w-[70px] rounded-sm my-3" style="background:rgba(200,169,110,.2);border:1px solid rgba(200,169,110,.2)"></div>
+              <div class="flex flex-col gap-1.5 mb-2">
+                <div class="h-1.5 w-[95%] rounded bg-ink5"></div>
+                <div class="h-1.5 w-[88%] rounded bg-ink5"></div>
+                <div class="h-1.5 w-[60%] rounded bg-ink5"></div>
+              </div>
+              <div class="h-1.5 w-[70px] rounded-sm my-3" style="background:rgba(200,169,110,.2);border:1px solid rgba(200,169,110,.2)"></div>
+              <div class="flex flex-col gap-2.5">
+                <div class="flex items-start gap-2">
+                  <div class="w-1.5 h-1.5 rounded-full bg-gold mt-1 flex-shrink-0"></div>
+                  <div class="flex-1 flex flex-col gap-1">
+                    <div class="h-1.5 w-[65%] rounded bg-ink5"></div>
+                    <div class="h-1.5 w-[45%] rounded bg-ink5 opacity-50"></div>
+                  </div>
+                </div>
+                <div class="flex items-start gap-2">
+                  <div class="w-1.5 h-1.5 rounded-full bg-ink5 mt-1 flex-shrink-0"></div>
+                  <div class="flex-1 flex flex-col gap-1">
+                    <div class="h-1.5 w-[55%] rounded bg-ink5"></div>
+                    <div class="h-1.5 w-[35%] rounded bg-ink5 opacity-50"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="h-1.5 w-[70px] rounded-sm my-3" style="background:rgba(200,169,110,.2);border:1px solid rgba(200,169,110,.2)"></div>
+              <div class="flex flex-wrap gap-1.5">
+                <div class="h-5 w-[60px] rounded-full bg-ink5 border border-white/10"></div>
+                <div class="h-5 w-[50px] rounded-full bg-ink5 border border-white/10"></div>
+                <div class="h-5 w-[70px] rounded-full bg-ink5 border border-white/10"></div>
+                <div class="h-5 w-[45px] rounded-full bg-ink5 border border-white/10"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Float badge 1 -->
+          <div class="animate-float absolute right-[-10px] top-[30px] z-20 bg-ink3 border border-white/10 rounded-xl p-3 shadow-2xl">
+            <div class="text-lg mb-0.5">📄</div>
+            <div class="font-semibold text-sm text-tx1">PDF Ready</div>
+            <div class="text-[.7rem] text-tx3">One-click export</div>
+          </div>
+          <!-- Float badge 2 -->
+          <div class="animate-float2 absolute left-[-20px] bottom-20 z-20 bg-ink3 border border-white/10 rounded-xl p-3 shadow-2xl">
+            <div class="text-lg mb-0.5">⚡</div>
+            <div class="font-semibold text-sm text-tx1">Live Preview</div>
+            <div class="text-[.7rem] text-tx3">Real-time updates</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════
+     TRUST STRIP
+══════════════════════════════ -->
+<div class="bg-ink2 border-y border-white/[.07] py-6">
+  <div class="max-w-6xl mx-auto px-6 flex flex-wrap items-center justify-center gap-6 md:gap-12">
+    <span class="text-xs text-tx3 uppercase tracking-widest text-center">
+      Helping developers &amp; students build their digital identity
+    </span>
+    <div class="flex flex-wrap items-center justify-center gap-6 md:gap-10">
+      <div class="flex items-center gap-2 text-sm text-tx2">
+        <div class="w-7 h-7 rounded-md bg-[#21262d] flex items-center justify-center">🐙</div>GitHub-ready
+      </div>
+      <div class="flex items-center gap-2 text-sm text-tx2">
+        <div class="w-7 h-7 rounded-md bg-[#1a3657] flex items-center justify-center">🔗</div>LinkedIn Export
+      </div>
+      <div class="flex items-center gap-2 text-sm text-tx2">
+        <div class="w-7 h-7 rounded-md bg-gold/10 flex items-center justify-center">⬡</div>Portfolio Sites
+      </div>
+      <div class="flex items-center gap-2 text-sm text-tx2">
+        <div class="w-7 h-7 rounded-md bg-green-500/10 flex items-center justify-center">📥</div>PDF Download
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════
+     FEATURES
+══════════════════════════════ -->
+<section id="features" class="py-24">
+  <div class="max-w-6xl mx-auto px-6">
+
+    <div class="text-center mb-16 reveal">
+      <div class="inline-flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/25
+                  px-4 py-1.5 rounded-full mb-5">
+        <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>Features
+      </div>
+      <h2 class="font-display text-4xl md:text-5xl font-medium tracking-tight leading-tight mb-4">
+        Everything you need to<br>stand out professionally
+      </h2>
+      <p class="text-base text-tx2 max-w-lg mx-auto">
+        Six powerful tools baked into one seamless builder. No subscriptions, no lock-in.
+      </p>
+    </div>
+
+    <!-- 3-col grid with gap-px border trick -->
+    <div class="reveal grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px
+                bg-white/[.07] border border-white/[.07] rounded-3xl overflow-hidden">
+
+      <div class="feat-card bg-ink2 p-9 hover:bg-ink3 transition-colors duration-200 cursor-default">
+        <div class="w-11 h-11 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-xl mb-5">📝</div>
+        <h3 class="font-medium text-base text-tx1 mb-2">Resume Builder</h3>
+        <p class="text-sm text-tx2 leading-relaxed">Fill in your details once. Get a polished, ATS-friendly resume ready for any job application.</p>
+      </div>
+      <div class="feat-card bg-ink2 p-9 hover:bg-ink3 transition-colors duration-200 cursor-default">
+        <div class="w-11 h-11 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-xl mb-5">🌐</div>
+        <h3 class="font-medium text-base text-tx1 mb-2">Portfolio Generator</h3>
+        <p class="text-sm text-tx2 leading-relaxed">Automatically generate a personal portfolio website showcasing your work and skills.</p>
+      </div>
+      <div class="feat-card bg-ink2 p-9 hover:bg-ink3 transition-colors duration-200 cursor-default">
+        <div class="w-11 h-11 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-xl mb-5">⬇</div>
+        <h3 class="font-medium text-base text-tx1 mb-2">PDF Download</h3>
+        <p class="text-sm text-tx2 leading-relaxed">Export your resume as a high-quality PDF with one click. Print-perfect formatting every time.</p>
+      </div>
+      <div class="feat-card bg-ink2 p-9 hover:bg-ink3 transition-colors duration-200 cursor-default">
+        <div class="w-11 h-11 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-xl mb-5">🎨</div>
+        <h3 class="font-medium text-base text-tx1 mb-2">Template Customization</h3>
+        <p class="text-sm text-tx2 leading-relaxed">Choose from multiple professionally designed templates. Switch themes without losing your data.</p>
+      </div>
+      <div class="feat-card bg-ink2 p-9 hover:bg-ink3 transition-colors duration-200 cursor-default">
+        <div class="w-11 h-11 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-xl mb-5">👁</div>
+        <h3 class="font-medium text-base text-tx1 mb-2">Live Preview</h3>
+        <p class="text-sm text-tx2 leading-relaxed">Watch your resume come to life in real-time as you type. What you see is exactly what you get.</p>
+      </div>
+      <div class="feat-card bg-ink2 p-9 hover:bg-ink3 transition-colors duration-200 cursor-default">
+        <div class="w-11 h-11 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-xl mb-5">🚀</div>
+        <h3 class="font-medium text-base text-tx1 mb-2">Project Showcase</h3>
+        <p class="text-sm text-tx2 leading-relaxed">Highlight your best projects with descriptions, links, and tech stacks in a structured format.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════
+     HOW IT WORKS
+══════════════════════════════ -->
+<section id="how-it-works" class="bg-ink2 py-24">
+  <div class="max-w-6xl mx-auto px-6">
+
+    <div class="text-center mb-16 reveal">
+      <div class="inline-flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/25
+                  px-4 py-1.5 rounded-full mb-5">
+        <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>Process
+      </div>
+      <h2 class="font-display text-4xl md:text-5xl font-medium tracking-tight mb-4">How It Works</h2>
+      <p class="text-base text-tx2 max-w-lg mx-auto">From blank page to job-ready portfolio in four simple steps.</p>
+    </div>
+
+    <div class="steps-row relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 reveal">
+
+      <!-- Step 1 -->
+      <div class="flex flex-col items-center text-center px-4 group">
+        <div class="w-14 h-14 rounded-full border border-gold bg-ink font-display text-xl font-medium text-gold
+                    flex items-center justify-center mb-5 relative z-10
+                    group-hover:bg-gold/10 group-hover:shadow-[0_0_0_6px_rgba(200,169,110,.1)] transition-all">1</div>
+        <div class="text-2xl mb-2 opacity-60">✍️</div>
+        <h3 class="font-medium text-sm text-tx1 mb-2">Fill your details</h3>
+        <p class="text-xs text-tx2 leading-relaxed">Enter your personal info, experience, education, skills, and projects through our guided form.</p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="flex flex-col items-center text-center px-4 group">
+        <div class="w-14 h-14 rounded-full border border-gold bg-ink font-display text-xl font-medium text-gold
+                    flex items-center justify-center mb-5 relative z-10
+                    group-hover:bg-gold/10 group-hover:shadow-[0_0_0_6px_rgba(200,169,110,.1)] transition-all">2</div>
+        <div class="text-2xl mb-2 opacity-60">🎨</div>
+        <h3 class="font-medium text-sm text-tx1 mb-2">Choose a template</h3>
+        <p class="text-xs text-tx2 leading-relaxed">Pick from Classic, Modern, or Minimal themes — each crafted for maximum professional impact.</p>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="flex flex-col items-center text-center px-4 group">
+        <div class="w-14 h-14 rounded-full border border-gold bg-ink font-display text-xl font-medium text-gold
+                    flex items-center justify-center mb-5 relative z-10
+                    group-hover:bg-gold/10 group-hover:shadow-[0_0_0_6px_rgba(200,169,110,.1)] transition-all">3</div>
+        <div class="text-2xl mb-2 opacity-60">⚡</div>
+        <h3 class="font-medium text-sm text-tx1 mb-2">Preview instantly</h3>
+        <p class="text-xs text-tx2 leading-relaxed">See your resume update live as you type. Fine-tune until it looks exactly right.</p>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="flex flex-col items-center text-center px-4 group">
+        <div class="w-14 h-14 rounded-full border border-gold bg-ink font-display text-xl font-medium text-gold
+                    flex items-center justify-center mb-5 relative z-10
+                    group-hover:bg-gold/10 group-hover:shadow-[0_0_0_6px_rgba(200,169,110,.1)] transition-all">4</div>
+        <div class="text-2xl mb-2 opacity-60">📤</div>
+        <h3 class="font-medium text-sm text-tx1 mb-2">Download or share</h3>
+        <p class="text-xs text-tx2 leading-relaxed">Export as PDF, save as JSON for later, or share your portfolio link directly with recruiters.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════
+     TEMPLATES
+══════════════════════════════ -->
+<section id="templates" class="py-24">
+  <div class="max-w-6xl mx-auto px-6">
+
+    <div class="text-center mb-16 reveal">
+      <div class="inline-flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/25
+                  px-4 py-1.5 rounded-full mb-5">
+        <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>Templates
+      </div>
+      <h2 class="font-display text-4xl md:text-5xl font-medium tracking-tight mb-4">Pick your style</h2>
+      <p class="text-base text-tx2 max-w-lg mx-auto">Three carefully crafted templates built for different industries and personalities.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 reveal">
+
+      <!-- Template 1: Developer -->
+      <div class="tpl-card bg-ink3 border border-white/10 rounded-3xl overflow-hidden">
+        <div class="h-60 p-5" style="background:linear-gradient(135deg,#0f1e3c,#162847,#0a1628)">
+          <div class="bg-white/5 rounded-lg p-2.5 mb-2">
+            <div class="h-2.5 w-[60%] rounded bg-white/20 mb-1.5"></div>
+            <div class="h-2 w-[40%] rounded bg-gold/50"></div>
+          </div>
+          <div class="grid grid-cols-[1fr_2fr] gap-1.5">
+            <div class="flex flex-col gap-1.5">
+              <div class="bg-white/[.04] rounded-md p-2">
+                <div class="h-4 rounded-full bg-gold/25 mb-1.5 w-[70%]"></div>
+                <div class="h-4 rounded-full bg-gold/25 w-[55%]"></div>
+              </div>
+              <div class="bg-white/[.04] rounded-md p-2">
+                <div class="h-4 rounded-full bg-gold/25 w-[60%]"></div>
+              </div>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <div class="bg-white/[.03] rounded-md p-2">
+                <div class="h-1.5 rounded bg-white/10 mb-1 w-[90%]"></div>
+                <div class="h-1.5 rounded bg-white/10 w-[75%]"></div>
+              </div>
+              <div class="bg-white/[.03] rounded-md p-2">
+                <div class="h-1.5 rounded bg-white/10 mb-1 w-[85%]"></div>
+                <div class="h-1.5 rounded bg-white/10 w-[65%]"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between px-5 py-4 border-t border-white/[.07]">
+          <div>
+            <p class="font-medium text-sm text-tx1">Developer</p>
+            <span class="text-[.7rem] text-tx3 bg-ink4 px-2.5 py-0.5 rounded-full border border-white/[.07]">Dark • Technical</span>
+          </div>
+          <a href="cv.html" class="tpl-use text-sm text-gold">Use this →</a>
+        </div>
+      </div>
+
+      <!-- Template 2: Modern Warm -->
+      <div class="tpl-card bg-ink3 border border-white/10 rounded-3xl overflow-hidden">
+        <div class="h-60 p-5" style="background:linear-gradient(135deg,#f5f0e8,#ece5d5)">
+          <div class="border-b-2 border-[#c8a96e] pb-2 mb-2.5">
+            <div class="h-3 w-[55%] rounded bg-[#3a2a10] mb-1.5"></div>
+            <div class="h-2 w-[35%] rounded bg-gold/40"></div>
+          </div>
+          <div class="flex gap-1.5 mb-2">
+            <div class="h-4 w-[60px] rounded bg-[#1a1000]"></div>
+            <div class="h-4 w-[50px] rounded bg-[#1a1000]"></div>
+            <div class="h-4 w-[70px] rounded bg-[#1a1000]"></div>
+          </div>
+          <div class="h-1 w-[40%] rounded my-2" style="background:rgba(200,169,110,.4)"></div>
+          <div class="flex flex-col gap-1.5">
+            <div class="h-1.5 w-[95%] rounded bg-black/10"></div>
+            <div class="h-1.5 w-[80%] rounded bg-black/10"></div>
+            <div class="h-1.5 w-[88%] rounded bg-black/10"></div>
+          </div>
+          <div class="h-1 w-[40%] rounded my-2" style="background:rgba(200,169,110,.4)"></div>
+          <div class="flex flex-col gap-1.5">
+            <div class="h-1.5 w-[90%] rounded bg-black/10"></div>
+            <div class="h-1.5 w-[70%] rounded bg-black/10"></div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between px-5 py-4 border-t border-white/[.07]">
+          <div>
+            <p class="font-medium text-sm text-tx1">Modern Warm</p>
+            <span class="text-[.7rem] text-tx3 bg-ink4 px-2.5 py-0.5 rounded-full border border-white/[.07]">Gold • Elegant</span>
+          </div>
+          <a href="cv.html" class="tpl-use text-sm text-gold">Use this →</a>
+        </div>
+      </div>
+
+      <!-- Template 3: Minimal Clean -->
+      <div class="tpl-card bg-ink3 border border-white/10 rounded-3xl overflow-hidden">
+        <div class="h-60 p-5 bg-white">
+          <div class="flex items-center gap-2 mb-2.5">
+            <div class="w-9 h-9 rounded-full bg-[#ddd] flex-shrink-0"></div>
+            <div class="flex-1">
+              <div class="h-2.5 w-[70%] rounded bg-[#ddd] mb-1.5"></div>
+              <div class="h-2 w-[50%] rounded bg-[#eee]"></div>
+            </div>
+          </div>
+          <div class="h-px bg-[#eee] my-2"></div>
+          <div class="flex gap-2 mb-2">
+            <div class="w-[70px] flex-shrink-0">
+              <div class="h-1.5 w-[80%] rounded bg-[#ccc] mb-1"></div>
+              <div class="h-1.5 w-[60%] rounded bg-[#ccc]"></div>
+            </div>
+            <div class="flex-1 flex flex-col gap-1">
+              <div class="h-1.5 rounded bg-[#e8e8e8] w-[80%]"></div>
+              <div class="h-1.5 rounded bg-[#e8e8e8] w-[60%]"></div>
+              <div class="h-1.5 rounded bg-[#e8e8e8] w-[90%]"></div>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <div class="w-[70px] flex-shrink-0">
+              <div class="h-1.5 w-[60%] rounded bg-[#ccc]"></div>
+            </div>
+            <div class="flex-1 flex flex-col gap-1">
+              <div class="h-1.5 rounded bg-[#e8e8e8] w-[70%]"></div>
+              <div class="h-1.5 rounded bg-[#e8e8e8] w-[55%]"></div>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between px-5 py-4 border-t border-white/[.07]">
+          <div>
+            <p class="font-medium text-sm text-tx1">Minimal Clean</p>
+            <span class="text-[.7rem] text-tx3 bg-ink4 px-2.5 py-0.5 rounded-full border border-white/[.07]">White • Classic</span>
+          </div>
+          <a href="cv.html" class="tpl-use text-sm text-gold">Use this →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════
+     DEMO / SCREENSHOT
+══════════════════════════════ -->
+<section class="bg-ink2 py-24">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
+
+      <!-- Content -->
+      <div class="reveal">
+        <div class="inline-flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/25
+                    px-4 py-1.5 rounded-full mb-5">
+          <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>Platform Preview
+        </div>
+        <h2 class="font-display text-4xl md:text-5xl font-medium tracking-tight leading-tight mb-4">
+          See your future<br>portfolio <em class="not-italic text-gold">live</em>
+        </h2>
+        <p class="text-base text-tx2 leading-relaxed mb-7">
+          Split-view editor with real-time rendering. Build your resume on the left, watch it come alive on the right.
+        </p>
+        <ul class="flex flex-col gap-3">
+          <li class="flex items-center gap-3 text-sm text-tx2">
+            <span class="w-5 h-5 rounded-full bg-gold/15 border border-gold/40 text-gold flex items-center justify-center text-xs flex-shrink-0">✓</span>
+            Auto-save to browser storage — never lose your work
+          </li>
+          <li class="flex items-center gap-3 text-sm text-tx2">
+            <span class="w-5 h-5 rounded-full bg-gold/15 border border-gold/40 text-gold flex items-center justify-center text-xs flex-shrink-0">✓</span>
+            Export &amp; import as JSON for full portability
+          </li>
+          <li class="flex items-center gap-3 text-sm text-tx2">
+            <span class="w-5 h-5 rounded-full bg-gold/15 border border-gold/40 text-gold flex items-center justify-center text-xs flex-shrink-0">✓</span>
+            Three polished templates, switchable in one click
+          </li>
+          <li class="flex items-center gap-3 text-sm text-tx2">
+            <span class="w-5 h-5 rounded-full bg-gold/15 border border-gold/40 text-gold flex items-center justify-center text-xs flex-shrink-0">✓</span>
+            Works entirely offline — no account needed
+          </li>
+        </ul>
+      </div>
+
+      <!-- Screens (desktop) -->
+      <div class="hidden lg:block reveal">
+        <div class="relative h-[360px]">
+          <!-- Builder -->
+          <div class="absolute left-10 top-0 z-20 w-[300px] h-[320px] bg-ink3 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+            <div class="h-8 bg-ink4 border-b border-white/5 flex items-center gap-1.5 px-3">
+              <div class="w-2 h-2 rounded-full bg-[#ff5f57]"></div>
+              <div class="w-2 h-2 rounded-full bg-[#febc2e]"></div>
+              <div class="w-2 h-2 rounded-full bg-[#28c840]"></div>
+              <span class="ml-2 text-[.6rem] text-tx3">ResumeForge Editor</span>
+            </div>
+            <div class="p-3.5 flex flex-col gap-2.5">
+              <div class="flex flex-col gap-1.5">
+                <div class="h-6 rounded-md bg-gold/10 border border-gold/20 flex items-center px-2"><div class="h-1.5 w-[50%] rounded bg-gold opacity-60"></div></div>
+                <div class="h-6 rounded-md bg-ink5 flex items-center px-2"><div class="h-1.5 w-[40%] rounded bg-ink4"></div></div>
+                <div class="h-6 rounded-md bg-ink5 flex items-center px-2"><div class="h-1.5 w-[55%] rounded bg-ink4"></div></div>
+              </div>
+              <div class="flex flex-col gap-2 mt-1">
+                <div class="h-2.5 w-[35%] rounded bg-ink5"></div>
+                <div class="h-7 rounded-md bg-ink4 border border-white/10"></div>
+                <div class="h-2.5 w-[30%] rounded bg-ink5"></div>
+                <div class="h-7 rounded-md bg-ink4 border border-white/10"></div>
+                <div class="h-14 rounded-md bg-ink4 border border-white/10"></div>
+                <div class="h-7 rounded-md bg-gold opacity-85 mt-1"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Preview -->
+          <div class="absolute right-0 top-12 z-30 w-[240px] h-[260px] bg-white border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+            <div class="h-8 bg-[#f4f4f4] border-b border-[#e8e8e8] flex items-center gap-1.5 px-3">
+              <div class="w-2 h-2 rounded-full bg-[#ff5f57]"></div>
+              <div class="w-2 h-2 rounded-full bg-[#febc2e]"></div>
+              <div class="w-2 h-2 rounded-full bg-[#28c840]"></div>
+              <span class="ml-2 text-[.6rem] text-[#888]">Live Preview</span>
+            </div>
+            <div class="p-3.5">
+              <div class="bg-[#1a2744] rounded-md p-2 mb-2">
+                <div class="h-2 w-[60%] rounded bg-white/20 mb-1.5"></div>
+                <div class="h-1.5 w-[40%] rounded bg-gold/50"></div>
+              </div>
+              <div class="flex flex-col gap-1.5 px-1">
+                <div class="h-1.5 w-[90%] rounded bg-[#e8e8ec]"></div>
+                <div class="h-1.5 w-[75%] rounded bg-[#e8e8ec]"></div>
+                <div class="h-1.5 w-[85%] rounded bg-[#e8e8ec]"></div>
+                <div class="h-1.5 w-[50%] rounded mt-2" style="background:rgba(200,169,110,.3)"></div>
+                <div class="h-1.5 w-[80%] rounded bg-[#e8e8ec]"></div>
+                <div class="h-1.5 w-[70%] rounded bg-[#e8e8ec]"></div>
+                <div class="flex gap-1 mt-2">
+                  <div class="h-3.5 w-10 rounded-full bg-[#eef0f8] border border-[#dde0ec]"></div>
+                  <div class="h-3.5 w-12 rounded-full bg-[#eef0f8] border border-[#dde0ec]"></div>
+                  <div class="h-3.5 w-9  rounded-full bg-[#eef0f8] border border-[#dde0ec]"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════
+     CTA
+══════════════════════════════ -->
+<section class="relative py-32 text-center overflow-hidden">
+  <div class="absolute inset-0 pointer-events-none"
+       style="background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(200,169,110,.07) 0%,transparent 70%)"></div>
+  <div class="absolute inset-0 pointer-events-none"
+       style="background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:50px 50px"></div>
+
+  <div class="max-w-3xl mx-auto px-6 relative z-10 reveal">
+    <p class="text-xs text-gold tracking-widest uppercase mb-5">Ready to begin?</p>
+    <h2 class="font-display text-5xl md:text-6xl font-medium tracking-tight leading-tight mb-5">
+      Build your professional<br>resume &amp; portfolio today
+    </h2>
+    <p class="text-lg text-tx2 mb-10">No account needed. No credit card. Just open and start building.</p>
+    <a href="cv.html"
+       class="inline-flex items-center gap-3 bg-gold text-[#1a0f00] font-medium text-lg
+              px-9 py-4 rounded-2xl hover:bg-gold2 hover:-translate-y-1
+              hover:shadow-[0_12px_40px_rgba(200,169,110,.3)] transition-all">
+      Start Building Now
+      <span class="w-7 h-7 rounded-full bg-black/15 flex items-center justify-center">→</span>
+    </a>
+    <p class="mt-4 text-xs text-tx3">Free forever · Runs in your browser · Your data stays private</p>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════
+     FOOTER
+══════════════════════════════ -->
+<footer class="bg-ink2 border-t border-white/[.07] pt-16 pb-8">
+  <div class="max-w-6xl mx-auto px-6">
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-14">
+
+      <!-- Brand -->
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <div class="hex w-6 h-6 bg-gold"></div>
+          <span class="font-display text-lg font-medium text-tx1">PortGen</span>
+        </div>
+        <p class="text-sm text-tx3 leading-relaxed max-w-[220px]">
+          Helping students and developers build their digital identity since 2024.
+        </p>
+      </div>
+
+      <!-- Product -->
+      <div>
+        <h4 class="text-[.72rem] font-medium uppercase tracking-widest text-tx2 mb-4">Product</h4>
+        <ul class="flex flex-col gap-2.5">
+          <li><a href="cv.html"    class="text-sm text-tx3 hover:text-gold transition-colors">Resume Builder</a></li>
+          <li><a href="#features"     class="text-sm text-tx3 hover:text-gold transition-colors">Features</a></li>
+          <li><a href="#templates"    class="text-sm text-tx3 hover:text-gold transition-colors">Templates</a></li>
+          <li><a href="#how-it-works" class="text-sm text-tx3 hover:text-gold transition-colors">How It Works</a></li>
+          <li><a href="portfolio.html" class="text-sm text-tx3 hover:text-gold transition-colors">Portfolio Preview</a></li>
+        </ul>
+      </div>
+
+      <!-- Resources -->
+      <div>
+        <h4 class="text-[.72rem] font-medium uppercase tracking-widest text-tx2 mb-4">Resources</h4>
+        <ul class="flex flex-col gap-2.5">
+          <li><a href="#" class="text-sm text-tx3 hover:text-gold transition-colors">GitHub</a></li>
+          <li><a href="#" class="text-sm text-tx3 hover:text-gold transition-colors">Documentation</a></li>
+          <li><a href="#" class="text-sm text-tx3 hover:text-gold transition-colors">Changelog</a></li>
+          <li><a href="#" class="text-sm text-tx3 hover:text-gold transition-colors">Open Source</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact -->
+      <div>
+        <h4 class="text-[.72rem] font-medium uppercase tracking-widest text-tx2 mb-4">Contact</h4>
+        <ul class="flex flex-col gap-2.5">
+          <li><a href="#" class="text-sm text-tx3 hover:text-gold transition-colors">Email Us</a></li>
+          <li><a href="#" class="text-sm text-tx3 hover:text-gold transition-colors">LinkedIn</a></li>
+          <li><a href="#" class="text-sm text-tx3 hover:text-gold transition-colors">GitHub Issues</a></li>
+          <li><a href="#" class="text-sm text-tx3 hover:text-gold transition-colors">Twitter / X</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="border-t border-white/[.07] pt-6 flex flex-wrap items-center justify-between gap-3">
+      <p class="text-xs text-tx3">© 2026 PortGen. All rights reserved. Built with ♥ for the developer community.</p>
+      <div class="flex gap-2">
+        <a href="#" class="w-8 h-8 rounded-md bg-ink4 border border-white/[.07] flex items-center justify-center text-sm text-tx2 hover:bg-gold/10 hover:border-gold hover:text-gold transition-all">🐙</a>
+        <a href="#" class="w-8 h-8 rounded-md bg-ink4 border border-white/[.07] flex items-center justify-center text-sm text-tx2 hover:bg-gold/10 hover:border-gold hover:text-gold transition-all">💼</a>
+        <a href="#" class="w-8 h-8 rounded-md bg-ink4 border border-white/[.07] flex items-center justify-center text-sm text-tx2 hover:bg-gold/10 hover:border-gold hover:text-gold transition-all">🐦</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<script>
+  /* Sticky navbar scroll effect */
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').style.background =
+      scrollY > 20 ? 'rgba(9,9,12,0.97)' : 'rgba(9,9,12,0.85)';
+  });
+
+  /* Mobile menu toggle */
+  function toggleMenu() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+  document.querySelectorAll('#mobileMenu a').forEach(a =>
+    a.addEventListener('click', () => document.getElementById('mobileMenu').classList.remove('open'))
+  );
+
+  /* Scroll reveal */
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  /* Smooth scroll for anchor links */
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const t = document.querySelector(a.getAttribute('href'));
+      if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); }
+    });
+  });
+</script>
+
+</body>
+</html>
