@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — PortGen</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink:  '#09090c', ink2: '#111116', ink3: '#18181f',
+            ink4: '#22222c', ink5: '#2e2e3a',
+            gold: '#c8a96e', gold2:'#e2c98a',
+            tx1:  '#f0ede6', tx2:  '#9a9790', tx3:  '#5a5854',
+          },
+          fontFamily: {
+            display: ['Fraunces','serif'],
+            sans:    ['DM Sans','sans-serif'],
+          },
+          keyframes: {
+            fadeUp:  { from:{opacity:0,transform:'translateY(20px)'}, to:{opacity:1,transform:'translateY(0)'} },
+            shake:   { '0%,100%':{transform:'translateX(0)'}, '20%,60%':{transform:'translateX(-6px)'}, '40%,80%':{transform:'translateX(6px)'} },
+          },
+          animation: {
+            fadeUp:  'fadeUp .5s ease both',
+            fadeUp1: 'fadeUp .5s .08s ease both',
+            fadeUp2: 'fadeUp .5s .16s ease both',
+            shake:   'shake .4s ease',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .hex { clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%); }
+
+    /* Input focus glow */
+    .auth-input:focus {
+      border-color: #c8a96e !important;
+      box-shadow: 0 0 0 3px rgba(200,169,110,0.15);
+      outline: none;
+    }
+    .auth-input { transition: border-color .2s, box-shadow .2s; }
+
+    /* Password strength bar */
+    .str-bar { height: 3px; border-radius: 999px; transition: width .4s ease, background .4s ease; }
+
+    /* Tab active */
+    .tab-btn.active {
+      color: #f0ede6;
+      border-bottom: 2px solid #c8a96e;
+    }
+
+    /* Grid background */
+    .grid-bg {
+      background-image: linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),
+                        linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 90% 90% at 50% 50%, black 30%, transparent 100%);
+    }
+
+    /* Error shake */
+    .shake { animation: shake .4s ease; }
+  </style>
+</head>
+
+<body class="bg-ink text-tx1 font-sans min-h-screen flex flex-col">
+
+<!-- ── NAVBAR ── -->
+<nav class="flex items-center justify-between px-6 py-4 border-b border-white/[.06]">
+  <a href="index.html" class="flex items-center gap-2">
+    <div class="hex w-6 h-6 bg-gold"></div>
+    <span class="font-display text-lg font-medium text-tx1 tracking-tight">PortGen</span>
+  </a>
+  <a href="index.html" class="text-xs text-tx3 hover:text-gold transition-colors border border-white/[.07] px-3 py-1.5 rounded-md hover:border-gold/30">
+    ← Back to Home
+  </a>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="flex-1 flex items-center justify-center px-4 py-12 relative overflow-hidden">
+
+  <!-- Background effects -->
+  <div class="grid-bg absolute inset-0 pointer-events-none"></div>
+  <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full pointer-events-none"
+       style="background:radial-gradient(circle,rgba(200,169,110,.06) 0%,transparent 70%)"></div>
+  <div class="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full pointer-events-none"
+       style="background:radial-gradient(circle,rgba(80,120,200,.05) 0%,transparent 70%)"></div>
+
+  <div class="relative z-10 w-full max-w-md animate-fadeUp">
+
+    <!-- Logo + heading -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gold/10 border border-gold/20 mb-4">
+        <div class="hex w-7 h-7 bg-gold"></div>
+      </div>
+      <h1 class="font-display text-3xl font-medium text-tx1 tracking-tight">Welcome to PortGen</h1>
+      <p class="text-tx2 text-sm mt-2">Build your resume & portfolio in minutes</p>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-ink2 border border-white/[.08] rounded-3xl p-8 shadow-2xl">
+
+      <!-- Tabs -->
+      <div class="flex border-b border-white/[.07] mb-7 gap-1">
+        <button id="tabLogin"
+                onclick="switchTab('login')"
+                class="tab-btn active flex-1 text-sm font-medium text-tx2 py-3 transition-colors">
+          Sign In
+        </button>
+        <button id="tabSignup"
+                onclick="switchTab('signup')"
+                class="tab-btn flex-1 text-sm font-medium text-tx2 py-3 transition-colors border-b-2 border-transparent">
+          Create Account
+        </button>
+      </div>
+
+      <!-- ── LOGIN FORM ── -->
+      <form id="loginForm" onsubmit="handleLogin(event)" class="flex flex-col gap-4">
+        <div>
+          <label class="text-xs text-tx3 uppercase tracking-widest mb-2 block">Email</label>
+          <input id="loginEmail" type="email" placeholder="you@example.com"
+                 class="auth-input w-full bg-ink3 border border-white/[.08] rounded-xl
+                        text-tx1 text-sm px-4 py-3 placeholder:text-tx3"/>
+        </div>
+        <div>
+          <label class="text-xs text-tx3 uppercase tracking-widest mb-2 block">Password</label>
+          <div class="relative">
+            <input id="loginPassword" type="password" placeholder="••••••••"
+                   class="auth-input w-full bg-ink3 border border-white/[.08] rounded-xl
+                          text-tx1 text-sm px-4 py-3 pr-12 placeholder:text-tx3"/>
+            <button type="button" onclick="togglePwd('loginPassword', this)"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-tx3 hover:text-tx2 text-lg transition-colors">👁</button>
+          </div>
+        </div>
+
+        <!-- Error message -->
+        <p id="loginError" class="text-red-400 text-xs hidden"></p>
+
+        <button type="submit"
+                class="mt-2 bg-gold text-[#1a0f00] font-semibold text-sm py-3.5 rounded-xl
+                       hover:bg-gold2 hover:-translate-y-0.5 hover:shadow-lg transition-all">
+          Sign In →
+        </button>
+
+        <p class="text-center text-xs text-tx3 mt-1">
+          Don't have an account?
+          <button type="button" onclick="switchTab('signup')" class="text-gold hover:text-gold2 transition-colors ml-1">Create one</button>
+        </p>
+      </form>
+
+      <!-- ── SIGNUP FORM ── -->
+      <form id="signupForm" onsubmit="handleSignup(event)" class="flex flex-col gap-4 hidden">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-tx3 uppercase tracking-widest mb-2 block">First Name</label>
+            <input id="signupFirst" type="text" placeholder="Jane"
+                   class="auth-input w-full bg-ink3 border border-white/[.08] rounded-xl
+                          text-tx1 text-sm px-4 py-3 placeholder:text-tx3"/>
+          </div>
+          <div>
+            <label class="text-xs text-tx3 uppercase tracking-widest mb-2 block">Last Name</label>
+            <input id="signupLast" type="text" placeholder="Smith"
+                   class="auth-input w-full bg-ink3 border border-white/[.08] rounded-xl
+                          text-tx1 text-sm px-4 py-3 placeholder:text-tx3"/>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-tx3 uppercase tracking-widest mb-2 block">Email</label>
+          <input id="signupEmail" type="email" placeholder="you@example.com"
+                 class="auth-input w-full bg-ink3 border border-white/[.08] rounded-xl
+                        text-tx1 text-sm px-4 py-3 placeholder:text-tx3"/>
+        </div>
+        <div>
+          <label class="text-xs text-tx3 uppercase tracking-widest mb-2 block">Password</label>
+          <div class="relative">
+            <input id="signupPassword" type="password" placeholder="Min. 6 characters"
+                   oninput="checkStrength(this.value)"
+                   class="auth-input w-full bg-ink3 border border-white/[.08] rounded-xl
+                          text-tx1 text-sm px-4 py-3 pr-12 placeholder:text-tx3"/>
+            <button type="button" onclick="togglePwd('signupPassword', this)"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-tx3 hover:text-tx2 text-lg transition-colors">👁</button>
+          </div>
+          <!-- Password strength -->
+          <div class="mt-2 flex gap-1">
+            <div id="str1" class="str-bar flex-1 bg-white/[.06]"></div>
+            <div id="str2" class="str-bar flex-1 bg-white/[.06]"></div>
+            <div id="str3" class="str-bar flex-1 bg-white/[.06]"></div>
+          </div>
+          <p id="strLabel" class="text-[.68rem] text-tx3 mt-1"></p>
+        </div>
+
+        <!-- Error message -->
+        <p id="signupError" class="text-red-400 text-xs hidden"></p>
+
+        <button type="submit"
+                class="mt-2 bg-gold text-[#1a0f00] font-semibold text-sm py-3.5 rounded-xl
+                       hover:bg-gold2 hover:-translate-y-0.5 hover:shadow-lg transition-all">
+          Create Account →
+        </button>
+
+        <p class="text-center text-xs text-tx3 mt-1">
+          Already have an account?
+          <button type="button" onclick="switchTab('login')" class="text-gold hover:text-gold2 transition-colors ml-1">Sign in</button>
+        </p>
+      </form>
+
+    </div>
+
+    <!-- Social proof -->
+    <p class="text-center text-xs text-tx3 mt-5">
+      🔒 Your data stays in your browser. We never see your information.
+    </p>
+
+  </div>
+</main>
+
+<script>
+'use strict';
+
+/* ── Redirect if already logged in ── */
+const _dest = new URLSearchParams(location.search).get('redirect') || 'index.html';
+if (localStorage.getItem('portgen_user')) {
+  window.location.href = _dest;
+}
+
+/* ── Tab switch ── */
+function switchTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('loginForm').classList.toggle('hidden', !isLogin);
+  document.getElementById('signupForm').classList.toggle('hidden', isLogin);
+  document.getElementById('tabLogin').classList.toggle('active', isLogin);
+  document.getElementById('tabSignup').classList.toggle('active', !isLogin);
+  document.getElementById('loginError').classList.add('hidden');
+  document.getElementById('signupError').classList.add('hidden');
+}
+
+/* ── Toggle password visibility ── */
+function togglePwd(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+}
+
+/* ── Password strength ── */
+function checkStrength(val) {
+  let score = 0;
+  if (val.length >= 6)  score++;
+  if (val.length >= 10) score++;
+  if (/[A-Z]/.test(val) && /[0-9!@#$%^&*]/.test(val)) score++;
+
+  const colors = ['#ef4444','#f59e0b','#22c55e'];
+  const labels = ['Weak','Fair','Strong'];
+  const bars   = ['str1','str2','str3'];
+
+  bars.forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.style.background = i < score ? colors[score - 1] : 'rgba(255,255,255,.06)';
+  });
+  document.getElementById('strLabel').textContent = val.length ? labels[score - 1] || '' : '';
+}
+
+/* ── LOGIN ── */
+function handleLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+
+  if (!email || !pass) {
+    showError(errEl, 'Please fill in all fields.');
+    return;
+  }
+
+  // Look up stored accounts
+  const accounts = JSON.parse(localStorage.getItem('portgen_accounts') || '{}');
+  const user = accounts[email.toLowerCase()];
+
+  if (!user) {
+    showError(errEl, 'No account found with that email. Please sign up.');
+    shakeForm('loginForm');
+    return;
+  }
+  if (user.password !== btoa(pass)) {
+    showError(errEl, 'Incorrect password. Please try again.');
+    shakeForm('loginForm');
+    return;
+  }
+
+  // Success — store session
+  localStorage.setItem('portgen_user', JSON.stringify({
+    name:  user.name,
+    email: email,
+    since: user.since,
+  }));
+  window.location.href = _dest;
+}
+
+/* ── SIGNUP ── */
+function handleSignup(e) {
+  e.preventDefault();
+  const first = document.getElementById('signupFirst').value.trim();
+  const last  = document.getElementById('signupLast').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const pass  = document.getElementById('signupPassword').value;
+  const errEl = document.getElementById('signupError');
+
+  if (!first || !email || !pass) {
+    showError(errEl, 'Please fill in all required fields.');
+    return;
+  }
+  if (pass.length < 6) {
+    showError(errEl, 'Password must be at least 6 characters.');
+    return;
+  }
+  if (!email.includes('@')) {
+    showError(errEl, 'Please enter a valid email address.');
+    return;
+  }
+
+  const accounts = JSON.parse(localStorage.getItem('portgen_accounts') || '{}');
+  if (accounts[email.toLowerCase()]) {
+    showError(errEl, 'An account with this email already exists. Sign in instead.');
+    shakeForm('signupForm');
+    return;
+  }
+
+  // Save account
+  accounts[email.toLowerCase()] = {
+    name:     [first, last].filter(Boolean).join(' '),
+    password: btoa(pass),
+    since:    new Date().toISOString(),
+  };
+  localStorage.setItem('portgen_accounts', JSON.stringify(accounts));
+
+  // Auto-login
+  localStorage.setItem('portgen_user', JSON.stringify({
+    name:  [first, last].filter(Boolean).join(' '),
+    email: email,
+    since: new Date().toISOString(),
+  }));
+  window.location.href = _dest;
+}
+
+/* ── Helpers ── */
+function showError(el, msg) {
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+function shakeForm(id) {
+  const f = document.getElementById(id);
+  f.classList.remove('shake');
+  void f.offsetWidth; // reflow
+  f.classList.add('shake');
+}
+</script>
+</body>
+</html>

@@ -16,7 +16,7 @@
 ════════════════════════════════════════════════════ -->
 <header class="topbar">
   <div class="topbar-left">
-    <a href="home.html" class="logo" title="Back to Home" style="text-decoration:none;">
+    <a href="index.html" class="logo" title="Back to Home" style="text-decoration:none;">
       <span class="logo-icon">⬡</span>
       <span class="logo-text">PortGen</span>
     </a>
@@ -39,7 +39,7 @@
       <button class="btn-ghost template-btn" data-tpl="minimal" onclick="setTemplate('minimal')">Minimal</button>
     </div>
     <div class="topbar-actions">
-      <a href="home.html" class="btn-ghost" title="Back to Home Page">← Home</a>
+      <a href="index.html" class="btn-ghost" title="Back to Home Page">← Home</a>
       <button class="btn-icon" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">☀</button>
       <button class="btn-ghost" onclick="saveResume()" title="Save to browser">💾 Save</button>
       <button class="btn-ghost" onclick="openA4Preview()" title="A4 Page Preview">👁 Preview</button>
@@ -205,27 +205,9 @@
 
   </aside>
 
-  <!-- ── RIGHT: LIVE PREVIEW ── -->
-  <div class="preview-area">
-    <div class="preview-toolbar">
-      <span class="preview-label">Live Preview</span>
-      <div class="zoom-controls">
-        <button class="btn-icon" onclick="changeZoom(-0.1)">−</button>
-        <span id="zoomLevel">100%</span>
-        <button class="btn-icon" onclick="changeZoom(0.1)">+</button>
-      </div>
-    </div>
-    <div class="preview-scroll">
-      <div class="preview-wrapper" id="previewWrapper">
-        <div class="resume-sheet" id="resumePreview">
-          <!-- Rendered by JS -->
-          <div class="empty-state">
-            <div class="empty-icon">📄</div>
-            <p>Start filling in your details<br>to see your resume come to life</p>
-          </div>
-        </div>
-      </div>
-    </div>
+  <!-- Hidden resume sheet used only for PDF / A4 preview rendering -->
+  <div style="position:fixed; left:-9999px; top:0; pointer-events:none; visibility:hidden;">
+    <div class="resume-sheet" id="resumePreview"></div>
   </div>
 
 </main>

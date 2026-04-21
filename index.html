@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PortGen — Build Your Portfolio & Resume in Minutes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink:  '#09090c', ink2: '#111116', ink3: '#18181f',
+            ink4: '#22222c', ink5: '#2e2e3a',
+            gold: '#c8a96e', gold2:'#e2c98a',
+            tx1:  '#f0ede6', tx2:  '#9a9790', tx3:  '#5a5854',
+          },
+          fontFamily: {
+            display: ['Fraunces','serif'],
+            sans:    ['DM Sans','sans-serif'],
+          },
+          keyframes: {
+            fadeUp:   { from:{opacity:0,transform:'translateY(20px)'}, to:{opacity:1,transform:'translateY(0)'} },
+            floatBob: { '0%,100%':{transform:'translateY(0)'}, '50%':{transform:'translateY(-8px)'} },
+          },
+          animation: {
+            fadeUp:  'fadeUp .6s ease both',
+            fadeUp1: 'fadeUp .6s .1s ease both',
+            fadeUp2: 'fadeUp .6s .2s ease both',
+            fadeUp3: 'fadeUp .6s .3s ease both',
+            float:   'floatBob 4s ease-in-out infinite',
+            float2:  'floatBob 4s 2s ease-in-out infinite',
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .hex { clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%); }
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity .65s ease,transform .65s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+    .grid-bg {
+      background-image: linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),
+                        linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+      background-size:60px 60px;
+      mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%);
+    }
+    .feat-card { position:relative; overflow:hidden; }
+    .feat-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg,transparent,#c8a96e,transparent);
+      opacity:0; transition:opacity .3s;
+    }
+    .feat-card:hover::before { opacity:1; }
+    @media(min-width:1024px) {
+      .steps-row::before {
+        content:''; position:absolute;
+        top:38px; left:calc(12.5% + 20px); right:calc(12.5% + 20px); height:1px;
+        background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),rgba(200,169,110,.2),rgba(255,255,255,.1),transparent);
+      }
+    }
+    .tpl-use  { opacity:0; transition:opacity .25s; }
+    .tpl-card:hover .tpl-use { opacity:1; }
+    .tpl-card { transition:all .3s; }
+    .tpl-card:hover {
+      border-color:#c8a96e !important;
+      transform:translateY(-6px);
+      box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(200,169,110,.2);
+    }
+    #mobileMenu { display:none; }
+    #mobileMenu.open { display:block; }
+    .pf-feature-card { transition: all .3s; }
+    .pf-feature-card:hover { border-color:rgba(200,169,110,.35) !important; transform:translateY(-4px); box-shadow:0 16px 48px rgba(0,0,0,.4); }
+  </style>
+</head>
+
+<body class="bg-ink text-tx1 font-sans overflow-x-hidden leading-relaxed">
+
+<!-- ══════════════════════════════ NAVBAR ══════════════════════════════ -->
+<nav id="navbar"
+     class="fixed top-0 left-0 right-0 z-50 h-16 flex items-center
+            bg-ink/85 backdrop-blur-lg border-b border-white/[.07] transition-all duration-300">
+  <div class="w-full max-w-6xl mx-auto px-6 flex items-center">
+    <a href="#" class="flex items-center gap-2.5 mr-auto">
+      <div class="hex w-7 h-7 bg-gold"></div>
+      <span class="font-display text-xl font-medium text-tx1 tracking-tight">PortGen</span>
+    </a>
+    <ul class="hidden md:flex items-center gap-0.5 list-none">
+      <li><a href="#"                class="text-sm text-tx2 px-3.5 py-1.5 rounded-md hover:text-tx1 hover:bg-white/5 transition-all">Home</a></li>
+      <li><a href="#features"        class="text-sm text-tx2 px-3.5 py-1.5 rounded-md hover:text-tx1 hover:bg-white/5 transition-all">Features</a></li>
+      <li><a href="#templates"       class="text-sm text-tx2 px-3.5 py-1.5 rounded-md hover:text-tx1 hover:bg-white/5 transition-all">Templates</a></li>
+      <li><a href="#how-it-works"    class="text-sm text-tx2 px-3.5 py-1.5 rounded-md hover:text-tx1 hover:bg-white/5 transition-all">How It Works</a></li>
+      <li><a href="#portfolio-about" class="text-sm text-tx2 px-3.5 py-1.5 rounded-md hover:text-tx1 hover:bg-white/5 transition-all">Portfolio</a></li>
+    </ul>
+    <div class="hidden md:flex items-center gap-2 ml-5" id="authButtons"></div>
+    <button onclick="toggleMenu()" class="md:hidden flex flex-col gap-1.5 p-1.5 ml-3">
+      <span class="w-5 h-px bg-tx2 rounded block"></span>
+      <span class="w-5 h-px bg-tx2 rounded block"></span>
+      <span class="w-5 h-px bg-tx2 rounded block"></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div id="mobileMenu" class="fixed top-16 left-0 right-0 z-40 bg-ink/98 backdrop-blur-lg border-b border-white/10 px-6 pb-6">
+  <a href="#"                class="block py-3 text-tx2 border-b border-white/5 hover:text-tx1 transition-colors">Home</a>
+  <a href="#features"        class="block py-3 text-tx2 border-b border-white/5 hover:text-tx1 transition-colors">Features</a>
+  <a href="#templates"       class="block py-3 text-tx2 border-b border-white/5 hover:text-tx1 transition-colors">Templates</a>
+  <a href="#how-it-works"    class="block py-3 text-tx2 border-b border-white/5 hover:text-tx1 transition-colors">How It Works</a>
+  <a href="#portfolio-about" class="block py-3 text-tx2 border-b border-white/5 hover:text-tx1 transition-colors">Portfolio</a>
+  <button onclick="goToBuilder()" class="block w-full mt-4 text-center bg-gold text-[#1a0f00] font-medium py-3 rounded-md">Get Started →</button>
+</div>
+
+
+<!-- ══════════════════════════════ HERO ══════════════════════════════ -->
+<section id="home" class="relative min-h-screen flex items-center pt-28 pb-20 overflow-hidden">
+  <div class="grid-bg absolute inset-0 pointer-events-none"></div>
+  <div class="absolute top-1/4 right-5 w-[500px] h-[500px] rounded-full pointer-events-none"
+       style="background:radial-gradient(circle,rgba(200,169,110,.08) 0%,transparent 70%)"></div>
+
+  <div class="max-w-6xl mx-auto px-6 w-full relative z-10">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <div>
+        <div class="inline-flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/25 px-4 py-1.5 rounded-full mb-6 animate-fadeUp">
+          <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>Now with AI-powered suggestions
+        </div>
+        <h1 class="font-display text-5xl lg:text-6xl font-medium leading-[1.08] tracking-tight text-tx1 mb-5 animate-fadeUp1">
+          Create Your<br><em class="not-italic text-gold">Portfolio &amp; Resume</em><br>in Minutes
+        </h1>
+        <p class="text-lg text-tx2 leading-relaxed mb-9 max-w-lg animate-fadeUp2">
+          Build a professional portfolio website and generate a polished resume PDF instantly — no coding, no templates to fight with.
+        </p>
+        <div class="flex gap-3 flex-wrap animate-fadeUp3">
+          <button onclick="goToBuilder()"
+             class="inline-flex items-center gap-2 bg-gold text-[#1a0f00] font-medium text-base px-7 py-3.5 rounded-xl hover:bg-gold2 hover:-translate-y-0.5 hover:shadow-xl transition-all">
+            Create Resume <span>→</span>
+          </button>
+          <a href="#templates" class="inline-flex items-center gap-2 border border-white/10 text-tx2 text-base px-6 py-3.5 rounded-xl hover:border-gold hover:text-gold hover:bg-gold/10 transition-all">
+            View Templates
+          </a>
+        </div>
+      </div>
+
+      <!-- Mockup -->
+      <div class="hidden lg:block relative">
+        <div class="relative h-[440px]">
+          <div class="absolute left-0 top-10 w-[280px] h-[360px] bg-ink3 border border-white/10 rounded-3xl overflow-hidden shadow-2xl opacity-60" style="transform:rotate(-4deg)">
+            <div class="h-9 bg-ink4 border-b border-white/5 flex items-center gap-1.5 px-3.5">
+              <div class="w-2 h-2 rounded-full bg-[#ff5f57]"></div><div class="w-2 h-2 rounded-full bg-[#febc2e]"></div><div class="w-2 h-2 rounded-full bg-[#28c840]"></div>
+            </div>
+            <div class="p-4 flex flex-col gap-2">
+              <div class="h-2 w-[70%] rounded bg-ink5 opacity-50"></div><div class="h-2 w-[40%] rounded bg-ink5 opacity-30"></div>
+              <div class="h-2 w-[80%] rounded bg-ink5 opacity-20 mt-3"></div><div class="h-2 w-[60%] rounded bg-ink5 opacity-20"></div>
+            </div>
+          </div>
+          <div class="absolute left-[60px] top-0 z-10 w-[340px] h-[420px] bg-ink3 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+            <div class="h-9 bg-ink4 border-b border-white/5 flex items-center gap-1.5 px-3.5">
+              <div class="w-2 h-2 rounded-full bg-[#ff5f57]"></div><div class="w-2 h-2 rounded-full bg-[#febc2e]"></div><div class="w-2 h-2 rounded-full bg-[#28c840]"></div>
+              <span class="ml-2 text-[.65rem] text-tx3">resume-preview</span>
+            </div>
+            <div class="p-4">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-11 h-11 rounded-full flex-shrink-0" style="background:linear-gradient(135deg,#c8a96e,#e8904a)"></div>
+                <div class="flex-1 flex flex-col gap-1.5"><div class="h-2 w-[80%] rounded bg-ink5"></div><div class="h-2 w-[55%] rounded" style="background:rgba(200,169,110,.25)"></div></div>
+              </div>
+              <div class="h-1.5 w-[70px] rounded-sm my-3" style="background:rgba(200,169,110,.2)"></div>
+              <div class="flex flex-col gap-1.5 mb-2"><div class="h-1.5 w-[95%] rounded bg-ink5"></div><div class="h-1.5 w-[88%] rounded bg-ink5"></div><div class="h-1.5 w-[60%] rounded bg-ink5"></div></div>
+              <div class="h-1.5 w-[70px] rounded-sm my-3" style="background:rgba(200,169,110,.2)"></div>
+              <div class="flex flex-wrap gap-1.5">
+                <div class="h-5 w-[60px] rounded-full bg-ink5 border border-white/10"></div>
+                <div class="h-5 w-[50px] rounded-full bg-ink5 border border-white/10"></div>
+                <div class="h-5 w-[70px] rounded-full bg-ink5 border border-white/10"></div>
+              </div>
+            </div>
+          </div>
+          <div class="animate-float absolute right-[-10px] top-[30px] z-20 bg-ink3 border border-white/10 rounded-xl p-3 shadow-2xl">
+            <div class="text-lg mb-0.5">📄</div><div class="font-semibold text-sm text-tx1">PDF Ready</div><div class="text-[.7rem] text-tx3">One-click export</div>
+          </div>
+          <div class="animate-float2 absolute left-[-20px] bottom-20 z-20 bg-ink3 border border-white/10 rounded-xl p-3 shadow-2xl">
+            <div class="text-lg mb-0.5">⚡</div><div class="font-semibold text-sm text-tx1">Live Preview</div><div class="text-[.7rem] text-tx3">Real-time updates</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════ TRUST STRIP ══════════════════════════════ -->
+<div class="bg-ink2 border-y border-white/[.07] py-6">
+  <div class="max-w-6xl mx-auto px-6 flex flex-wrap items-center justify-center gap-6 md:gap-12">
+    <span class="text-xs text-tx3 uppercase tracking-widest text-center">Helping developers &amp; students build their digital identity</span>
+    <div class="flex flex-wrap items-center justify-center gap-6 md:gap-10">
+      <div class="flex items-center gap-2 text-sm text-tx2"><div class="w-7 h-7 rounded-md bg-[#21262d] flex items-center justify-center">🐙</div>GitHub-ready</div>
+      <div class="flex items-center gap-2 text-sm text-tx2"><div class="w-7 h-7 rounded-md bg-[#1a3657] flex items-center justify-center">🔗</div>LinkedIn Export</div>
+      <div class="flex items-center gap-2 text-sm text-tx2"><div class="w-7 h-7 rounded-md bg-gold/10 flex items-center justify-center">⬡</div>Portfolio Sites</div>
+      <div class="flex items-center gap-2 text-sm text-tx2"><div class="w-7 h-7 rounded-md bg-green-500/10 flex items-center justify-center">📥</div>PDF Download</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════ FEATURES ══════════════════════════════ -->
+<section id="features" class="py-24">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-16 reveal">
+      <div class="inline-flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/25 px-4 py-1.5 rounded-full mb-5"><span class="w-1.5 h-1.5 rounded-full bg-gold"></span>Features</div>
+      <h2 class="font-display text-4xl md:text-5xl font-medium tracking-tight leading-tight mb-4">Everything you need to<br>stand out professionally</h2>
+      <p class="text-base text-tx2 max-w-lg mx-auto">Six powerful tools baked into one seamless builder. No subscriptions, no lock-in.</p>
+    </div>
+    <div class="reveal grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-white/[.07] border border-white/[.07] rounded-3xl overflow-hidden">
+      <div class="feat-card bg-ink2 p-9 hover:bg-ink3 transition-colors duration-200 cursor-default"><div class="w-11 h-11 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-xl mb-5">📝</div><h3 class="font-medium text-base text-tx1 mb-2">Resume Builder</h3><p class="text-sm text-tx2 leading-relaxed">Fill in your details once. Get a polished, ATS-friendly resume ready for any job application.</p></div>
+      <div class="feat-card bg-ink2 p-9 hover:bg-ink3 transition-colors duration-200 cursor-default"><div class="w-11 h-11 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-xl mb-5">🌐</div><h3 class="font-medium text-base text-tx1 mb-2">Portfolio Generator</h3><p class="text-sm text-tx2 leading-relaxed">Automatically generate a personal portfolio website showcasing your work and skills.</p></div>
+      <div class="feat-card bg-ink2 p-9 hover:bg-ink3 transition-colors duration-200 cursor-default"><div class="w-11 h-11 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-xl mb-5">⬇</div><h3 class="font-medium text-base text-tx1 mb-2">PDF Download</h3><p class="text-sm text-tx2 leading-relaxed">Export your resume as a high-quality PDF with one click. Print-perfect formatting every time.</p></div>
+      <div class="feat-card bg-ink2 p-9 hover:bg-ink3 transition-colors duration-200 cursor-default"><div class="w-11 h-11 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-xl mb-5">🎨</div><h3 class="font-medium text-base text-tx1 mb-2">Template Customization</h3><p class="text-sm text-tx2 leading-relaxed">Choose from multiple professionally designed templates. Switch themes without losing your data.</p></div>
+      <div class="feat-card bg-ink2 p-9 hover:bg-ink3 transition-colors duration-200 cursor-default"><div class="w-11 h-11 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-xl mb-5">👁</div><h3 class="font-medium text-base text-tx1 mb-2">Live Preview</h3><p class="text-sm text-tx2 leading-relaxed">Watch your resume come to life in real-time as you type. What you see is exactly what you get.</p></div>
+      <div class="feat-card bg-ink2 p-9 hover:bg-ink3 transition-colors duration-200 cursor-default"><div class="w-11 h-11 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-xl mb-5">🚀</div><h3 class="font-medium text-base text-tx1 mb-2">Project Showcase</h3><p class="text-sm text-tx2 leading-relaxed">Highlight your best projects with descriptions, links, and tech stacks in a structured format.</p></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════ HOW IT WORKS ══════════════════════════════ -->
+<section id="how-it-works" class="bg-ink2 py-24">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-16 reveal">
+      <div class="inline-flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/25 px-4 py-1.5 rounded-full mb-5"><span class="w-1.5 h-1.5 rounded-full bg-gold"></span>Process</div>
+      <h2 class="font-display text-4xl md:text-5xl font-medium tracking-tight mb-4">How It Works</h2>
+      <p class="text-base text-tx2 max-w-lg mx-auto">From blank page to job-ready portfolio in four simple steps.</p>
+    </div>
+    <div class="steps-row relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 reveal">
+      <div class="flex flex-col items-center text-center px-4 group">
+        <div class="w-14 h-14 rounded-full border border-gold bg-ink font-display text-xl font-medium text-gold flex items-center justify-center mb-5 relative z-10 group-hover:bg-gold/10 group-hover:shadow-[0_0_0_6px_rgba(200,169,110,.1)] transition-all">1</div>
+        <div class="text-2xl mb-2 opacity-60">🔐</div>
+        <h3 class="font-medium text-sm text-tx1 mb-2">Sign In / Sign Up</h3>
+        <p class="text-xs text-tx2 leading-relaxed">Create your free PortGen account in 10 seconds. Your data stays private in your browser.</p>
+      </div>
+      <div class="flex flex-col items-center text-center px-4 group">
+        <div class="w-14 h-14 rounded-full border border-gold bg-ink font-display text-xl font-medium text-gold flex items-center justify-center mb-5 relative z-10 group-hover:bg-gold/10 group-hover:shadow-[0_0_0_6px_rgba(200,169,110,.1)] transition-all">2</div>
+        <div class="text-2xl mb-2 opacity-60">✍️</div>
+        <h3 class="font-medium text-sm text-tx1 mb-2">Fill your details</h3>
+        <p class="text-xs text-tx2 leading-relaxed">Enter your experience, education, skills, and projects through our guided form.</p>
+      </div>
+      <div class="flex flex-col items-center text-center px-4 group">
+        <div class="w-14 h-14 rounded-full border border-gold bg-ink font-display text-xl font-medium text-gold flex items-center justify-center mb-5 relative z-10 group-hover:bg-gold/10 group-hover:shadow-[0_0_0_6px_rgba(200,169,110,.1)] transition-all">3</div>
+        <div class="text-2xl mb-2 opacity-60">🎨</div>
+        <h3 class="font-medium text-sm text-tx1 mb-2">Choose a template</h3>
+        <p class="text-xs text-tx2 leading-relaxed">Pick from Classic, Modern, or Minimal themes — each crafted for maximum impact.</p>
+      </div>
+      <div class="flex flex-col items-center text-center px-4 group">
+        <div class="w-14 h-14 rounded-full border border-gold bg-ink font-display text-xl font-medium text-gold flex items-center justify-center mb-5 relative z-10 group-hover:bg-gold/10 group-hover:shadow-[0_0_0_6px_rgba(200,169,110,.1)] transition-all">4</div>
+        <div class="text-2xl mb-2 opacity-60">📤</div>
+        <h3 class="font-medium text-sm text-tx1 mb-2">Download or share</h3>
+        <p class="text-xs text-tx2 leading-relaxed">Export as PDF, download your portfolio ZIP, or share your link directly with recruiters.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════ TEMPLATES ══════════════════════════════ -->
+<section id="templates" class="py-24">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-16 reveal">
+      <div class="inline-flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/25 px-4 py-1.5 rounded-full mb-5"><span class="w-1.5 h-1.5 rounded-full bg-gold"></span>Templates</div>
+      <h2 class="font-display text-4xl md:text-5xl font-medium tracking-tight mb-4">Pick your style</h2>
+      <p class="text-base text-tx2 max-w-lg mx-auto">Three carefully crafted templates for different industries and personalities.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 reveal">
+      <!-- Developer -->
+      <div class="tpl-card bg-ink3 border border-white/10 rounded-3xl overflow-hidden">
+        <div class="h-60 p-5" style="background:linear-gradient(135deg,#0f1e3c,#162847,#0a1628)">
+          <div class="bg-white/5 rounded-lg p-2.5 mb-2"><div class="h-2.5 w-[60%] rounded bg-white/20 mb-1.5"></div><div class="h-2 w-[40%] rounded bg-gold/50"></div></div>
+          <div class="grid grid-cols-[1fr_2fr] gap-1.5"><div class="flex flex-col gap-1.5"><div class="bg-white/[.04] rounded-md p-2"><div class="h-4 rounded-full bg-gold/25 mb-1.5 w-[70%]"></div><div class="h-4 rounded-full bg-gold/25 w-[55%]"></div></div></div><div class="flex flex-col gap-1.5"><div class="bg-white/[.03] rounded-md p-2"><div class="h-1.5 rounded bg-white/10 mb-1 w-[90%]"></div><div class="h-1.5 rounded bg-white/10 w-[75%]"></div></div></div></div>
+        </div>
+        <div class="flex items-center justify-between px-5 py-4 border-t border-white/[.07]">
+          <div><p class="font-medium text-sm text-tx1">Developer</p><span class="text-[.7rem] text-tx3 bg-ink4 px-2.5 py-0.5 rounded-full border border-white/[.07]">Dark • Technical</span></div>
+          <button onclick="goToBuilder()" class="tpl-use text-sm text-gold">Use this →</button>
+        </div>
+      </div>
+      <!-- Modern Warm -->
+      <div class="tpl-card bg-ink3 border border-white/10 rounded-3xl overflow-hidden">
+        <div class="h-60 p-5" style="background:linear-gradient(135deg,#f5f0e8,#ece5d5)">
+          <div class="border-b-2 border-[#c8a96e] pb-2 mb-2.5"><div class="h-3 w-[55%] rounded bg-[#3a2a10] mb-1.5"></div><div class="h-2 w-[35%] rounded bg-gold/40"></div></div>
+          <div class="flex gap-1.5 mb-2"><div class="h-4 w-[60px] rounded bg-[#1a1000]"></div><div class="h-4 w-[50px] rounded bg-[#1a1000]"></div></div>
+          <div class="flex flex-col gap-1.5"><div class="h-1.5 w-[95%] rounded bg-black/10"></div><div class="h-1.5 w-[80%] rounded bg-black/10"></div></div>
+        </div>
+        <div class="flex items-center justify-between px-5 py-4 border-t border-white/[.07]">
+          <div><p class="font-medium text-sm text-tx1">Modern Warm</p><span class="text-[.7rem] text-tx3 bg-ink4 px-2.5 py-0.5 rounded-full border border-white/[.07]">Gold • Elegant</span></div>
+          <button onclick="goToBuilder()" class="tpl-use text-sm text-gold">Use this →</button>
+        </div>
+      </div>
+      <!-- Minimal Clean -->
+      <div class="tpl-card bg-ink3 border border-white/10 rounded-3xl overflow-hidden">
+        <div class="h-60 p-5 bg-white">
+          <div class="flex items-center gap-2 mb-2.5"><div class="w-9 h-9 rounded-full bg-[#ddd] flex-shrink-0"></div><div class="flex-1"><div class="h-2.5 w-[70%] rounded bg-[#ddd] mb-1.5"></div><div class="h-2 w-[50%] rounded bg-[#eee]"></div></div></div>
+          <div class="h-px bg-[#eee] my-2"></div>
+          <div class="flex gap-2"><div class="w-[70px] flex-shrink-0"><div class="h-1.5 w-[80%] rounded bg-[#ccc] mb-1"></div></div><div class="flex-1 flex flex-col gap-1"><div class="h-1.5 rounded bg-[#e8e8e8] w-[80%]"></div><div class="h-1.5 rounded bg-[#e8e8e8] w-[60%]"></div></div></div>
+        </div>
+        <div class="flex items-center justify-between px-5 py-4 border-t border-white/[.07]">
+          <div><p class="font-medium text-sm text-tx1">Minimal Clean</p><span class="text-[.7rem] text-tx3 bg-ink4 px-2.5 py-0.5 rounded-full border border-white/[.07]">White • Classic</span></div>
+          <button onclick="goToBuilder()" class="tpl-use text-sm text-gold">Use this →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════ PORTFOLIO ABOUT ══════════════════════════════ -->
+<section id="portfolio-about" class="bg-ink2 py-24">
+  <div class="max-w-6xl mx-auto px-6">
+
+    <div class="text-center mb-16 reveal">
+      <div class="inline-flex items-center gap-2 text-xs text-gold bg-gold/10 border border-gold/25 px-4 py-1.5 rounded-full mb-5"><span class="w-1.5 h-1.5 rounded-full bg-gold"></span>Portfolio Website</div>
+      <h2 class="font-display text-4xl md:text-5xl font-medium tracking-tight leading-tight mb-4">
+        More than a resume —<br>a <em class="not-italic text-gold">complete digital identity</em>
+      </h2>
+      <p class="text-base text-tx2 max-w-xl mx-auto leading-relaxed">
+        After building your resume, PortGen automatically generates a full personal portfolio website from the same data — ready to deploy anywhere in 30 seconds.
+      </p>
+    </div>
+
+    <!-- Left features + right preview -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center mb-16">
+      <div class="reveal">
+        <h3 class="font-display text-2xl font-medium text-tx1 mb-6 tracking-tight">What your portfolio includes</h3>
+        <div class="flex flex-col gap-4">
+          <div class="flex items-start gap-4 p-4 bg-ink3 border border-white/[.07] rounded-2xl hover:border-gold/20 transition-all">
+            <div class="w-10 h-10 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-lg flex-shrink-0">🦸</div>
+            <div><div class="font-medium text-sm text-tx1 mb-1">Hero Section</div><div class="text-xs text-tx2 leading-relaxed">Your name, photo, title, summary, and contact chips — all auto-populated from your resume data.</div></div>
+          </div>
+          <div class="flex items-start gap-4 p-4 bg-ink3 border border-white/[.07] rounded-2xl hover:border-gold/20 transition-all">
+            <div class="w-10 h-10 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-lg flex-shrink-0">💼</div>
+            <div><div class="font-medium text-sm text-tx1 mb-1">Experience Timeline</div><div class="text-xs text-tx2 leading-relaxed">A beautiful animated timeline of your work history with company, role, dates, and descriptions.</div></div>
+          </div>
+          <div class="flex items-start gap-4 p-4 bg-ink3 border border-white/[.07] rounded-2xl hover:border-gold/20 transition-all">
+            <div class="w-10 h-10 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-lg flex-shrink-0">🚀</div>
+            <div><div class="font-medium text-sm text-tx1 mb-1">Projects Showcase</div><div class="text-xs text-tx2 leading-relaxed">Card grid highlighting your best work with live links, role, and description — perfect for developers.</div></div>
+          </div>
+          <div class="flex items-start gap-4 p-4 bg-ink3 border border-white/[.07] rounded-2xl hover:border-gold/20 transition-all">
+            <div class="w-10 h-10 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-lg flex-shrink-0">📦</div>
+            <div><div class="font-medium text-sm text-tx1 mb-1">Download as ZIP</div><div class="text-xs text-tx2 leading-relaxed">Get 3 clean files (HTML + CSS + JS) — deploy to Netlify, GitHub Pages, or Vercel in one click.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Portfolio page preview mockup -->
+      <div class="reveal">
+        <div class="bg-ink3 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+          <div class="h-10 bg-ink4 border-b border-white/5 flex items-center gap-2 px-4">
+            <div class="w-2.5 h-2.5 rounded-full bg-[#ff5f57]"></div>
+            <div class="w-2.5 h-2.5 rounded-full bg-[#febc2e]"></div>
+            <div class="w-2.5 h-2.5 rounded-full bg-[#28c840]"></div>
+            <div class="ml-3 flex-1 bg-ink5 rounded-md h-5 flex items-center px-3">
+              <span class="text-[.6rem] text-tx3">yourname.netlify.app</span>
+            </div>
+          </div>
+          <div class="p-5" style="background:linear-gradient(160deg,#09090c 0%,#111116 100%)">
+            <!-- Mini nav -->
+            <div class="flex items-center justify-between mb-5 px-1">
+              <div class="flex items-center gap-1.5"><div class="hex w-4 h-4 bg-gold"></div><div class="h-2 w-14 rounded bg-tx1/20"></div></div>
+              <div class="flex gap-2"><div class="h-1.5 w-8 rounded bg-tx3/40"></div><div class="h-1.5 w-10 rounded bg-tx3/40"></div><div class="h-1.5 w-8 rounded bg-tx3/40"></div></div>
+            </div>
+            <!-- Hero -->
+            <div class="grid grid-cols-3 gap-3 mb-4">
+              <div class="col-span-2">
+                <div class="h-1.5 w-28 rounded-full bg-gold/30 mb-3"></div>
+                <div class="h-4 w-[90%] rounded bg-tx1/15 mb-1.5"></div>
+                <div class="h-4 w-[70%] rounded bg-gold/25 mb-3"></div>
+                <div class="h-1.5 w-[95%] rounded bg-tx2/20 mb-1"></div>
+                <div class="h-1.5 w-[80%] rounded bg-tx2/20 mb-3"></div>
+                <div class="flex gap-2"><div class="h-6 w-20 rounded-lg bg-gold/60"></div><div class="h-6 w-16 rounded-lg border border-white/10"></div></div>
+              </div>
+              <div class="flex flex-col items-center gap-2">
+                <div class="w-16 h-16 rounded-full border-2 border-gold/30" style="background:linear-gradient(135deg,rgba(200,169,110,.3),rgba(200,169,110,.08))"></div>
+                <div class="grid grid-cols-2 gap-1 w-full">
+                  <div class="bg-ink3 rounded-lg p-1.5 text-center border border-white/[.06]"><div class="text-[.6rem] text-gold font-bold">4</div><div class="text-[.5rem] text-tx3">Roles</div></div>
+                  <div class="bg-ink3 rounded-lg p-1.5 text-center border border-white/[.06]"><div class="text-[.6rem] text-gold font-bold">6</div><div class="text-[.5rem] text-tx3">Projects</div></div>
+                </div>
+              </div>
+            </div>
+            <!-- Skills -->
+            <div class="flex gap-1.5 flex-wrap mb-3">
+              <div class="h-4 w-12 rounded-full bg-ink5 border border-white/[.08]"></div>
+              <div class="h-4 w-14 rounded-full bg-ink5 border border-white/[.08]"></div>
+              <div class="h-4 w-10 rounded-full bg-ink5 border border-white/[.08]"></div>
+              <div class="h-4 w-16 rounded-full bg-ink5 border border-white/[.08]"></div>
+            </div>
+            <!-- Section heading + project cards -->
+            <div class="flex items-center gap-2 mb-2">
+              <div class="h-1.5 w-12 rounded-full bg-gold/30"></div>
+              <div class="flex-1 h-px bg-gold/10"></div>
+            </div>
+            <div class="grid grid-cols-3 gap-1.5">
+              <div class="bg-ink3 rounded-lg p-2 border border-white/[.06]"><div class="h-0.5 w-full rounded-full mb-2 bg-gradient-to-r from-gold/60 to-transparent"></div><div class="h-1.5 w-[80%] rounded bg-tx1/20 mb-1"></div><div class="h-1 w-[60%] rounded bg-tx2/20"></div></div>
+              <div class="bg-ink3 rounded-lg p-2 border border-white/[.06]"><div class="h-0.5 w-full rounded-full mb-2 bg-gradient-to-r from-blue-400/50 to-transparent"></div><div class="h-1.5 w-[70%] rounded bg-tx1/20 mb-1"></div><div class="h-1 w-[55%] rounded bg-tx2/20"></div></div>
+              <div class="bg-ink3 rounded-lg p-2 border border-white/[.06]"><div class="h-0.5 w-full rounded-full mb-2 bg-gradient-to-r from-emerald-400/50 to-transparent"></div><div class="h-1.5 w-[85%] rounded bg-tx1/20 mb-1"></div><div class="h-1 w-[50%] rounded bg-tx2/20"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 feature cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 reveal">
+      <div class="pf-feature-card bg-ink3 border border-white/[.07] rounded-2xl p-5 text-center"><div class="text-2xl mb-3">🎨</div><div class="font-medium text-sm text-tx1 mb-1">Dark Gold Theme</div><div class="text-xs text-tx3 leading-relaxed">Stunning dark aesthetic with gold accents — looks like a premium SaaS product.</div></div>
+      <div class="pf-feature-card bg-ink3 border border-white/[.07] rounded-2xl p-5 text-center"><div class="text-2xl mb-3">📱</div><div class="font-medium text-sm text-tx1 mb-1">Fully Responsive</div><div class="text-xs text-tx3 leading-relaxed">Looks perfect on desktop, tablet, and mobile. Works on all browsers.</div></div>
+      <div class="pf-feature-card bg-ink3 border border-white/[.07] rounded-2xl p-5 text-center"><div class="text-2xl mb-3">⚡</div><div class="font-medium text-sm text-tx1 mb-1">Zero Dependencies</div><div class="text-xs text-tx3 leading-relaxed">Pure HTML + CSS + JS — no frameworks, no build step. Just upload and go.</div></div>
+      <div class="pf-feature-card bg-ink3 border border-white/[.07] rounded-2xl p-5 text-center"><div class="text-2xl mb-3">🌐</div><div class="font-medium text-sm text-tx1 mb-1">Free Deployment</div><div class="text-xs text-tx3 leading-relaxed">Deploy free on Netlify, GitHub Pages, or Vercel. Live URL in under a minute.</div></div>
+    </div>
+
+    <!-- CTA -->
+    <div class="text-center mt-12 reveal">
+      <button onclick="goToBuilder()"
+              class="inline-flex items-center gap-3 bg-gold text-[#1a0f00] font-medium text-base px-8 py-4 rounded-2xl hover:bg-gold2 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(200,169,110,.3)] transition-all">
+        Build My Portfolio Now
+        <span class="w-7 h-7 rounded-full bg-black/15 flex items-center justify-center">→</span>
+      </button>
+      <p class="text-xs text-tx3 mt-3">Sign in or create a free account to get started</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════ CTA ══════════════════════════════ -->
+<section class="relative py-32 text-center overflow-hidden">
+  <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(200,169,110,.07) 0%,transparent 70%)"></div>
+  <div class="absolute inset-0 pointer-events-none" style="background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:50px 50px"></div>
+
+  <div class="max-w-3xl mx-auto px-6 relative z-10 reveal">
+    <p class="text-xs text-gold tracking-widest uppercase mb-5">Ready to begin?</p>
+    <h2 class="font-display text-5xl md:text-6xl font-medium tracking-tight leading-tight mb-5">Build your professional<br>resume &amp; portfolio today</h2>
+    <p class="text-lg text-tx2 mb-10">Free forever. Runs in your browser. Sign in to save your progress.</p>
+    <button onclick="goToBuilder()"
+            class="inline-flex items-center gap-3 bg-gold text-[#1a0f00] font-medium text-lg px-9 py-4 rounded-2xl hover:bg-gold2 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(200,169,110,.3)] transition-all">
+      Start Building Now
+      <span class="w-7 h-7 rounded-full bg-black/15 flex items-center justify-center">→</span>
+    </button>
+    <p class="mt-4 text-xs text-tx3">Sign in or create a free account — takes 10 seconds</p>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════ FOOTER ══════════════════════════════ -->
+<footer class="bg-ink2 border-t border-white/[.07] pt-16 pb-8">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-14">
+      <div>
+        <div class="flex items-center gap-2 mb-4"><div class="hex w-6 h-6 bg-gold"></div><span class="font-display text-lg font-medium text-tx1">PortGen</span></div>
+        <p class="text-sm text-tx3 leading-relaxed max-w-[220px]">Helping students and developers build their digital identity since 2026.</p>
+      </div>
+      <div>
+        <h4 class="text-[.72rem] font-medium uppercase tracking-widest text-tx2 mb-4">Product</h4>
+        <ul class="flex flex-col gap-2.5">
+          <li><button onclick="goToBuilder()" class="text-sm text-tx3 hover:text-gold transition-colors text-left">Resume Builder</button></li>
+          <li><a href="#features"        class="text-sm text-tx3 hover:text-gold transition-colors">Features</a></li>
+          <li><a href="#templates"       class="text-sm text-tx3 hover:text-gold transition-colors">Templates</a></li>
+          <li><a href="#portfolio-about" class="text-sm text-tx3 hover:text-gold transition-colors">Portfolio</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-[.72rem] font-medium uppercase tracking-widest text-tx2 mb-4">Resources</h4>
+        <ul class="flex flex-col gap-2.5">
+          <li><a href="#" class="text-sm text-tx3 hover:text-gold transition-colors">GitHub</a></li>
+          <li><a href="#" class="text-sm text-tx3 hover:text-gold transition-colors">Documentation</a></li>
+          <li><a href="#" class="text-sm text-tx3 hover:text-gold transition-colors">Changelog</a></li>
+          <li><a href="#" class="text-sm text-tx3 hover:text-gold transition-colors">Open Source</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-[.72rem] font-medium uppercase tracking-widest text-tx2 mb-4">Account</h4>
+        <ul class="flex flex-col gap-2.5">
+          <li><a href="login.html" class="text-sm text-tx3 hover:text-gold transition-colors">Sign In</a></li>
+          <li><a href="login.html" class="text-sm text-tx3 hover:text-gold transition-colors">Create Account</a></li>
+          <li><a href="#" class="text-sm text-tx3 hover:text-gold transition-colors">Privacy Policy</a></li>
+          <li><a href="#" class="text-sm text-tx3 hover:text-gold transition-colors">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-white/[.07] pt-6 flex flex-wrap items-center justify-between gap-3">
+      <p class="text-xs text-tx3">© 2026 PortGen. All rights reserved. Built with ♥ for the developer community. @Praveen Gautam</p>
+      <div class="flex gap-2">
+        <a href="#" class="w-8 h-8 rounded-md bg-ink4 border border-white/[.07] flex items-center justify-center text-sm text-tx2 hover:bg-gold/10 hover:border-gold hover:text-gold transition-all">🐙</a>
+        <a href="#" class="w-8 h-8 rounded-md bg-ink4 border border-white/[.07] flex items-center justify-center text-sm text-tx2 hover:bg-gold/10 hover:border-gold hover:text-gold transition-all">💼</a>
+        <a href="#" class="w-8 h-8 rounded-md bg-ink4 border border-white/[.07] flex items-center justify-center text-sm text-tx2 hover:bg-gold/10 hover:border-gold hover:text-gold transition-all">🐦</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<script>
+'use strict';
+
+/* ── Auth helpers ── */
+function getUser() {
+  try { return JSON.parse(localStorage.getItem('portgen_user')); } catch { return null; }
+}
+
+/* ── Render navbar auth section ── */
+function renderAuthButtons() {
+  const user = getUser();
+  const wrap = document.getElementById('authButtons');
+  if (user) {
+    const initial = user.name ? user.name[0].toUpperCase() : 'U';
+    const firstName = user.name ? user.name.split(' ')[0] : 'User';
+    wrap.innerHTML =
+      '<span class="text-xs text-tx2 px-3 py-1.5 rounded-md border border-white/[.07] flex items-center gap-1.5">'
+      + '<span class="w-5 h-5 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center text-[.6rem] text-gold font-bold">' + initial + '</span>'
+      + firstName
+      + '</span>'
+      + '<button onclick="logout()" class="text-xs text-tx3 px-3 py-1.5 rounded-md border border-white/[.07] hover:text-gold hover:border-gold/30 transition-all">Sign Out</button>'
+      + '<button onclick="goToBuilder()" class="text-sm font-medium bg-gold text-[#1a0f00] px-5 py-2 rounded-md hover:bg-gold2 hover:-translate-y-0.5 hover:shadow-lg transition-all">Open Builder →</button>';
+  } else {
+    wrap.innerHTML =
+      '<a href="login.html" class="text-sm text-tx2 px-4 py-1.5 rounded-md border border-white/10 hover:text-tx1 hover:bg-white/5 transition-all">Login</a>'
+      + '<button onclick="goToBuilder()" class="text-sm font-medium bg-gold text-[#1a0f00] px-5 py-2 rounded-md hover:bg-gold2 hover:-translate-y-0.5 hover:shadow-lg transition-all">Get Started →</button>';
+  }
+}
+
+/* ── Route all builder CTAs through login ── */
+function goToBuilder() {
+  if (getUser()) {
+    window.location.href = 'cv.html';
+  } else {
+    window.location.href = 'login.html?redirect=cv.html';
+  }
+}
+
+/* ── Sign out ── */
+function logout() {
+  localStorage.removeItem('portgen_user');
+  renderAuthButtons();
+  const t = document.createElement('div');
+  t.textContent = 'Signed out successfully';
+  t.style.cssText = 'position:fixed;bottom:24px;right:24px;z-cv:9999;background:#18181f;border:1px solid rgba(255,255,255,.1);color:#f0ede6;font-size:.85rem;font-family:DM Sans,sans-serif;padding:12px 20px;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.5)';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2200);
+}
+
+/* ── Init ── */
+renderAuthButtons();
+
+/* ── Sticky navbar ── */
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').style.background = scrollY > 20 ? 'rgba(9,9,12,0.97)' : 'rgba(9,9,12,0.85)';
+});
+
+/* ── Mobile menu ── */
+function toggleMenu() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+document.querySelectorAll('#mobileMenu a, #mobileMenu button').forEach(el =>
+  el.addEventListener('click', () => document.getElementById('mobileMenu').classList.remove('open'))
+);
+
+/* ── Scroll reveal ── */
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+/* ── Smooth scroll ── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); }
+  });
+});
+</script>
+
+</body>
+</html>
